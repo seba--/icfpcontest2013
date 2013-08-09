@@ -1,0 +1,1 @@
+{"id":"ipERVbUH0J2AJomzQLLZ6pCS","size":14,"operators":["and","if0","not","shl1","tfold"],"challenge":"(lambda (x_16681) (fold x_16681 0 (lambda (x_16681 x_16682) (if0 (and (shl1 (not (shl1 x_16681))) 0) x_16681 x_16681))))"}

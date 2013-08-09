@@ -1,0 +1,1 @@
+{"id":"zQkCWxOAmHOIDhEPhccSCsVY","size":8,"operators":["or","shl1","shr4"],"challenge":"(lambda (x_7724) (or (shr4 (shl1 (or 1 x_7724))) 1))"}

@@ -17,4 +17,6 @@ object TrainingProblemStore {
   def read(id: String) = JsonParser.parse(scala.io.Source.fromFile(new File(folder, id)).mkString)
 
   def ids() = folder.list();
+  
+  def allProblems() = ids.map{read(_)}
 }

@@ -1,0 +1,1 @@
+{"id":"GRhDc4F6yvcK1Kwm4BWk14Db","size":15,"operators":["if0","plus","shr16","shr4","tfold"],"challenge":"(lambda (x_20367) (fold x_20367 0 (lambda (x_20367 x_20368) (plus (if0 (plus (shr4 (shr16 x_20368)) x_20368) 1 x_20367) x_20368))))"}

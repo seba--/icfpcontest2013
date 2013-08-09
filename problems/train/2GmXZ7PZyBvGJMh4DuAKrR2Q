@@ -1,0 +1,1 @@
+{"id":"2GmXZ7PZyBvGJMh4DuAKrR2Q","size":8,"operators":["tfold","xor"],"challenge":"(lambda (x_495) (fold x_495 0 (lambda (x_495 x_496) (xor x_495 x_496))))"}
