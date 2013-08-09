@@ -15,11 +15,12 @@ case class TestSolver(solver: Solver, mutator: Mutator, filter: Filter, fitness:
     do {
       sol = solver.nextSolution
       
-      spec.data.foreach { case (input,output) => {
+      spec.data.foreach { case (input,output) => 
         val result = Semantics.eval(sol.get)(input)
         if (result != output)
-          println(s"Failed with input $input, expected: $output, but was: " + Semantics.toString(result))
-      }}
+          println(s"Solver failed on input $input, expected: $output, but was: " + Semantics.toString(result))
+          println(s"Proposed solution was $sol")
+      }
     } while (sol.isDefined)
   }
   
