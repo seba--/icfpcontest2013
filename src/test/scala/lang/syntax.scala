@@ -21,16 +21,15 @@ class TrainingDataParserSuite extends FunSuite {
   import lang.Concrete.ParseException
 
   test("training data") {
-    TrainingProblemStore.default.ids.foreach { id =>
-      val prob = TrainingProblemStore.default.read(id)
+    TrainingProblemStore.default.allProblems.foreach { prob =>
       try {
         parse(prob.challenge)
       } catch {
         case ParseException(msg, str) =>
-          println("FAILED " + id)
+          println("FAILED " + prob.id)
           assert(false, msg + ", was: " + str)
       }
-      println("OK " + id)
+      println("OK " + prob.id)
     }
   }
 }
