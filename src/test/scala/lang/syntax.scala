@@ -1,3 +1,4 @@
+package lang
 
 import org.scalatest.FunSuite
 import json.TrainingProblemStore
