@@ -7,7 +7,7 @@ object Abstract {
   object Operator extends Enumeration {
     val Not, Shl1, Shr1, Shr4, Shr16 = Value
     val And, Or, Xor, Plus = Value
-    val If0, Fold = Value
+    val If0, Fold, TFold = Value
   }
   type Operator = Operator.Value
 

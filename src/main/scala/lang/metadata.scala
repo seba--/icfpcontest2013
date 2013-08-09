@@ -16,7 +16,13 @@ object Metadata {
     case BApp(_, e1, e2) => 1 + size(e1) + size(e2)
   }
   
-  def ops(p: Prg): Set[Operator] = ops(p.e)
+  def ops(p: Prg): Set[Operator] = {
+    val os = ops(p.e)
+    if (hasTopFold(p))
+      os + Operator.TFold
+    else
+      os
+  }
   
   def ops(e: Exp): Set[Operator] = e match {
     case Zero() => Set()
