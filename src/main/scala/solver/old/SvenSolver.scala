@@ -1,9 +1,7 @@
-package solver
+package solver.old
 
 import lang.Abstract._
-import java.util.Dictionary
 import lang.Abstract.Operator._
-import scala.collection.mutable.Stack
 import lang.Semantics._
 import scala.collection.mutable
 
