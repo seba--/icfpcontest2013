@@ -2,6 +2,8 @@ package json
 
 import java.io.File
 import model.TrainingProblem
+import com.fasterxml.jackson.core.JsonFactory
+import scala.collection.JavaConversions
 
 object TrainingProblemStatistics extends App {
   type SumMap = Map[Int, Map[Int, Set[String]]]
@@ -54,7 +56,14 @@ object TrainingProblemStatistics extends App {
     sums.all(programSize)(numberOfOps)
   }
 
-  val sums = sum(TrainingProblemStore.allProblems)
+  val parser = new JsonFactory().createJsonParser(new File("problems", "myproblems.txt"));
+  def myProblems = JsonParser.mapper.readValues(parser, classOf[TrainingProblem])
+  var result = List[TrainingProblem]()
+  while(myProblems.hasNext()) {
+    result ::= myProblems.next()
+  }
+  
+  val sums = sum(result)
   csvPrint("all", sums.all)
   csvPrint("withFold", sums.withFold)
   csvPrint("withoutFold", sums.withoutFold)

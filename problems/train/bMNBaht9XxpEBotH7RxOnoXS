@@ -1,0 +1,1 @@
+{"id":"bMNBaht9XxpEBotH7RxOnoXS","size":8,"operators":["or","xor"],"challenge":"(lambda (x_7490) (xor (xor (or 1 x_7490) 0) 1))"}
