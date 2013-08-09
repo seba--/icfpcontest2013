@@ -6,17 +6,12 @@ object Abstract {
   
   type Id = String
 
-  object Unary extends Enumeration {
+  object Operator extends Enumeration {
     val Not, Shl1, Shr1, Shr4, Shr16 = Value
-  }
-  import Unary._
-  type Unary = Unary.Value
-  
-  object Binary extends Enumeration {
     val And, Or, Xor, Plus = Value
+    val If0, Fold, TFold = Value
   }
-  import Binary._
-  type Binary = Binary.Value
+  type Operator = Operator.Value
 
   case class Prg(x: Id, e: Exp) { 
     override def toString = "(lambda (" + x + ") " + e + ")" 
@@ -28,8 +23,8 @@ object Abstract {
   case class Var(x: Id) extends Exp { override def toString = x }
   case class IfZero(cond: Exp, yes: Exp, no: Exp) extends Exp { override def toString = "(if0 " + cond + " " + yes + " " + no + ")" }
   case class Fold(over: Exp, init: Exp, f: FoldFun) extends Exp { override def toString = "(fold " + over+ " " + init + " " + f + ")" }
-  case class UApp(op: Unary, e: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e + ")" }
-  case class BApp(op: Binary, e1: Exp, e2: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e1 + " " + e2 + ")" }
+  case class UApp(op: Operator, e: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e + ")" }
+  case class BApp(op: Operator, e1: Exp, e2: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e1 + " " + e2 + ")" }
   
   final case class FoldFun(next: Id, acc: Id, body: Exp) { 
     override def toString = "(lambda (" + next + " " + acc + ") " + body + ")" 
@@ -119,19 +114,19 @@ object Concrete {
       }
     }
 
-  def tryParseUnary(s: String): Option[Result[Unary]] = {
+  def tryParseUnary(s: String): Option[Result[Operator]] = {
     val (op, s2) = parseId(layout(s))
     val operator = 
     if (op == "not")
-      Unary.Not
+      Operator.Not
     else if (op == "shl1")
-      Unary.Shl1 
+      Operator.Shl1 
     else if(op == "shr1")
-      Unary.Shr1
+      Operator.Shr1
     else if (op == "shr4")
-      Unary.Shr4
+      Operator.Shr4
     else if (op == "shr16")
-      Unary.Shr16
+      Operator.Shr16
     else 
       null
     if (operator != null)
@@ -140,17 +135,17 @@ object Concrete {
       None
   }
 
-  def tryParseBinary(s: String): Option[Result[Binary]] = {
+  def tryParseBinary(s: String): Option[Result[Operator]] = {
     val (op, s2) = parseId(layout(s))
     val operator = 
     if (op == "and")
-      Binary.And
+      Operator.And
     else if (op == "or")
-      Binary.Or 
+      Operator.Or 
     else if(op == "xor")
-      Binary.Xor
+      Operator.Xor
     else if (op == "plus")
-      Binary.Plus
+      Operator.Plus
     else 
       null
     if (operator != null)
