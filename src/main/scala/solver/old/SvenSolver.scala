@@ -37,7 +37,7 @@ class SvenSolver(size : Int, operators: List[Operator]) {
   }
   
   def test(knowledge : Map[Long, Long]) : Boolean = {
-    val prg = Prg("test", solution)
+    val prg = lang.FlatAbstract.makeFlat(Prg("test", solution))
     knowledge foreach ((tuple) => (if (eval(prg)(tuple._1) != tuple._2) return false))
     true
   }
