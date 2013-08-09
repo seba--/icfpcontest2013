@@ -1,5 +1,7 @@
 
-trait Abstract {
+import scala.util.Either
+
+object Abstract {
   
   type Id = String
 
@@ -28,5 +30,43 @@ trait Abstract {
   
   final case class FoldFun(next: Id, acc: Id, body: Exp)
   
+}
+
+object Concrete {
+  
+  import Abstract._
+  
+  type Error = String
+  type Result[A] = Either[(A, String), Error]
+  
+  def parse(s: String) = parsePrg(s)
+  
+  def parsePrg : String => Result[Prg] =
+    inParens(seq(word("lambda"), inParens(parseId), parseExp))
+  
+  def layout(str: String): Result[Unit] = {
+    var s: String = str
+    while (s.size > 0) {
+      val c = s(0)
+      if (c == ' ' || c == '\n' || c == '\r' || c == '\t')
+        s = s.substring(1)
+      else
+        return Left(((), s))
+    }
+    return Left(((), s))
+  } 
+  
+  def word(w: String)(s: String): Result[Unit] = 
+    if (s.startsWith(w))
+      Left(((), s.substring(w.size)))
+    else
+      Right("expected " + w)
+  
+  def inParens[A](parser: String => Result[A])(s: String): Result[A] = {
+    val size = s.size
+    if (size >= 2 && s(0) == '(' && s(size - 1) == ')')
+      return parser(s.substring(1, size - 1))
+    return Right("Expected parenthesized form")
+  }
 }
 
