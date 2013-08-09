@@ -20,8 +20,8 @@ object Abstract {
   case class Prg(x: Id, e: Exp)
   
   abstract class Exp
-  case class Zero extends Exp
-  case class One extends Exp
+  case class Zero() extends Exp
+  case class One() extends Exp
   case class Var(x: Id) extends Exp
   case class IfZero(cond: Exp, yes: Exp, no: Exp) extends Exp
   case class Fold(over: Exp, init: Exp, f: FoldFun) extends Exp
