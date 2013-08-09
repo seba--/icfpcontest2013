@@ -1,0 +1,1 @@
+{"id":"ctYDkZELhgY5PhIAAlVCPgzI","size":5,"operators":["not","shl1","shr16"],"challenge":"(lambda (x_3947) (shl1 (not (shr16 x_3947))))"}

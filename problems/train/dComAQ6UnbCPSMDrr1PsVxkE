@@ -1,0 +1,1 @@
+{"id":"dComAQ6UnbCPSMDrr1PsVxkE","size":5,"operators":["plus","shr16"],"challenge":"(lambda (x_4199) (shr16 (plus x_4199 x_4199)))"}

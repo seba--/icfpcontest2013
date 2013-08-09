@@ -1,0 +1,1 @@
+{"id":"dUqCbvAxo7QJCfuLrHCUZ3RO","size":26,"operators":["if0","not","or","plus","shl1","shr1","shr4","xor"],"challenge":"(lambda (x_40055) (not (xor (shl1 (plus (plus (shr4 x_40055) (not (not (shr1 (xor (shl1 (or (if0 (not (shr1 (xor x_40055 0))) 0 0) x_40055)) x_40055))))) x_40055)) 1)))"}
