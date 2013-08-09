@@ -9,7 +9,7 @@ import solver.mutators.LinearMutator
 class EnumeratorTest extends FunSuite {
   test("nextNode") {
     val seq = List[Node](And, Or, Xor)
-    LinearMutator.init(new ProblemSpec(10, seq, null))
+    LinearMutator.init(new ProblemSpec("", 10, seq, null))
     val expected = List(Zero -> One,
                         One -> MainVar,
                         MainVar -> And,
@@ -33,7 +33,7 @@ class EnumeratorTest extends FunSuite {
   }
   
   test("empty -> next") {
-    LinearMutator.init(new ProblemSpec(10, null, null))
+    LinearMutator.init(new ProblemSpec("", 10, null, null))
     assert(LinearMutator.mutate(DoubleLinkedList()) == DoubleLinkedList(Zero))
   }
 }
