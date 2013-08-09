@@ -32,4 +32,8 @@ class SomeTests extends FunSuite{
     
     testEval(prog, expected)
   }
+  
+  test("0 to 255 for all downloaded training problems") {
+    
+  }
 } 
