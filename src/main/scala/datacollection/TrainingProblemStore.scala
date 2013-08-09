@@ -6,8 +6,8 @@ import json.JsonParser
 import scala.Array.canBuildFrom
 
 case class TrainingProblemStore(folder: File) {
-  if(!folder.isDirectory() && !folder.mkdirs()) throw new IllegalArgumentException("folder must be a directory!")
-  
+  if (!folder.isDirectory() && !folder.mkdirs()) throw new IllegalArgumentException("folder must be a directory!")
+
   def write(problem: TrainingProblem) {
     val p = new java.io.PrintWriter(new File(folder, problem.id))
     try {
@@ -18,7 +18,7 @@ case class TrainingProblemStore(folder: File) {
   }
 
   def read(id: String) = {
-    JsonParser.parseProblem(scala.io.Source.fromFile(new File(folder, id)).mkString)
+    JsonParser.deserialize(scala.io.Source.fromFile(new File(folder, id)).mkString, classOf[TrainingProblem])
   }
 
   def contains(id: String) = {
