@@ -62,9 +62,9 @@ object FlatAbstract {
       foldAccVar: Abstract.Id = null): Exp = e match {
     case Abstract.Zero() => DoubleLinkedList(Zero)
     case Abstract.One() => DoubleLinkedList(One)
-    case Abstract.Var(v) if v == mainVar => DoubleLinkedList(MainVar)
     case Abstract.Var(v) if foldNextVar != null && v == foldNextVar => DoubleLinkedList(FoldNext)
     case Abstract.Var(v) if foldAccVar != null && v == foldAccVar => DoubleLinkedList(FoldAcc)
+    case Abstract.Var(v) if v == mainVar => DoubleLinkedList(MainVar)
     case Abstract.Var(v) => sys.error("Cannot convert unknown variable " + v)
     case Abstract.IfZero(cond, yes, no) => (DoubleLinkedList(IfZero) ++ makeFlat(cond, mainVar, foldNextVar, foldAccVar)
                                                                      ++ makeFlat(yes, mainVar, foldNextVar, foldAccVar)
@@ -168,7 +168,12 @@ object Concrete {
   
   type Result[A] = (A, String)
   
-  def parse(s: String): Result[Prg] = parsePrg(s)
+  def parse(s: String): FlatAbstract.Exp = {
+    val (p, rest) = parsePrg(s)
+    if (!rest.isEmpty)
+      throw ParseException("Expected end of file", rest)
+    FlatAbstract.makeFlat(p)
+  }
   
   def parsePrg: String => Result[Prg] =
     inParens(s => {
