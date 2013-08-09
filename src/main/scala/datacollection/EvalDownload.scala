@@ -42,7 +42,7 @@ object EvalDownload extends BotApp {
       }
       val updatedProblem = problem.copy(evaluationResults = updatedResults)
       targetStore.write(updatedProblem);
-      log("done problem: " + problem.id + ", " + toDownload + " items left.")
+      log("done problem: " + problem.id + ", " + toDownload.size + " items left.")
       wait(5)
     } catch {
       case e: Exception =>
