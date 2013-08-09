@@ -1,3 +1,17 @@
+== How to compile/develop/run ==
+
+Prerequisite: Install SBT
+	http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html#installing-sbt
+
+Compile:
+	run $> sbt compile
+Compile and run Tests:
+	run $> sbt test
+Develop using Eclipse Scala IDE:
+	run $> sbt eclipse
+	then "import -> existing projects into workspace" in Eclipse Scala IDE
+	
+== Team and Signup information ==
 
 AUTH code: 0256cpBWw1iiQ9BmQnLRWzAEtN9fLxClBk9CYn3e  (don't forget "vpsH1H" at the end in requests)
 
