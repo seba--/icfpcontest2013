@@ -1,0 +1,13 @@
+{
+    "id": "O8IuasQpeml62rBmseWVfwfP",
+    "size": 16,
+    "operators": [
+        "and",
+        "fold",
+        "if0",
+        "or",
+        "plus",
+        "shl1"
+    ],
+    "challenge": "(lambda (x_35942) (fold (if0 (plus (and 1 x_35942) x_35942) x_35942 x_35942) 1 (lambda (x_35943 x_35944) (or (shl1 x_35944) x_35943))))"
+}
