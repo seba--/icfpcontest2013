@@ -1,0 +1,1 @@
+{"id":"BagGTZE1FcB2GP9m8DKzhM1k","size":10,"operators":["and","if0","shl1","xor"],"challenge":"(lambda (x_10205) (if0 (xor (and x_10205 1) (shl1 0)) 0 1))"}

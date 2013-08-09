@@ -1,0 +1,1 @@
+{"id":"TcyVkzEnaUnicZwXMLIoDvsF","size":8,"operators":["or","plus","shr16","shr4"],"challenge":"(lambda (x_7013) (or (shr16 (plus (shr4 x_7013) 0)) x_7013))"}

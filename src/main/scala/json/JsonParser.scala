@@ -5,7 +5,7 @@ import com.fasterxml.jackson.module.scala.DefaultScalaModule
 import model.TrainingProblem
 
 object JsonParser {
-  private val mapper = new ObjectMapper()
+  val mapper = new ObjectMapper()
   mapper.registerModule(DefaultScalaModule)
 
   def parse(json: String) = mapper.readValue(json, classOf[TrainingProblem])
