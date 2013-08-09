@@ -1,5 +1,7 @@
 package lang
 
+import scala.collection.mutable.DoubleLinkedList
+
 object Abstract {
   
   type Id = String
@@ -34,8 +36,129 @@ object Abstract {
   final case class FoldFun(next: Id, acc: Id, body: Exp) { 
     override def toString = "(lambda (" + next + " " + acc + ") " + body + ")" 
   }
-  
 }
+
+
+object FlatAbstract {
+  
+  object Node extends Enumeration {
+    val Zero, One, MainVar = Value
+    val IfZero, Fold, FoldNext, FoldAcc = Value
+    val Not, Shl1, Shr1, Shr4, Shr16 = Value
+    val And, Or, Xor, Plus = Value
+  }
+  type Node = Node.Value
+  import Node._
+  
+  type Exp = DoubleLinkedList[Node]
+  
+  
+  def makeFlat(p: Abstract.Prg): Exp = makeFlat(p.e, p.x)
+  
+  def makeFlat(
+      e: Abstract.Exp, 
+      mainVar: Abstract.Id,
+      foldNextVar: Abstract.Id = null, 
+      foldAccVar: Abstract.Id = null): Exp = e match {
+    case Abstract.Zero() => DoubleLinkedList(Zero)
+    case Abstract.One() => DoubleLinkedList(One)
+    case Abstract.Var(v) if v == mainVar => DoubleLinkedList(MainVar)
+    case Abstract.Var(v) if foldNextVar != null && v == foldNextVar => DoubleLinkedList(FoldNext)
+    case Abstract.Var(v) if foldAccVar != null && v == foldAccVar => DoubleLinkedList(FoldAcc)
+    case Abstract.Var(v) => sys.error("Cannot convert unknown variable " + v)
+    case Abstract.IfZero(cond, yes, no) => (DoubleLinkedList(IfZero) ++ makeFlat(cond, mainVar, foldNextVar, foldAccVar)
+                                                                     ++ makeFlat(yes, mainVar, foldNextVar, foldAccVar)
+                                                                     ++ makeFlat(no, mainVar, foldNextVar, foldAccVar))
+    case Abstract.Fold(over, init, Abstract.FoldFun(next, acc, body)) =>
+      (DoubleLinkedList(Fold) ++ makeFlat(over, mainVar, foldNextVar, foldAccVar)
+                              ++ makeFlat(init, mainVar, foldNextVar, foldAccVar)
+                              ++ makeFlat(body, mainVar, next, acc))
+    case Abstract.UApp(op, e) =>
+      DoubleLinkedList(makeUnaryOp(op)) ++ makeFlat(e, mainVar, foldNextVar, foldAccVar)
+    case Abstract.BApp(op, e1, e2) =>
+      DoubleLinkedList(makeBinaryOp(op)) ++ makeFlat(e1, mainVar, foldNextVar, foldAccVar) ++ makeFlat(e2, mainVar, foldNextVar, foldAccVar)
+  }
+  
+  def makeUnaryOp(op: Abstract.Operator) = 
+    op match {
+      case Abstract.Operator.Not => Not
+      case Abstract.Operator.Shl1 => Shl1
+      case Abstract.Operator.Shr1 => Shr1
+      case Abstract.Operator.Shr4 => Shr4
+      case Abstract.Operator.Shr16=> Shr16
+    }
+
+  def makeBinaryOp(op: Abstract.Operator) = 
+    op match {
+      case Abstract.Operator.And => And
+      case Abstract.Operator.Or => Or
+      case Abstract.Operator.Xor => Xor
+      case Abstract.Operator.Plus => Plus
+    }
+  
+  def makeStructuralPrg(e: Exp): Abstract.Prg = {
+    val (exp, rest) = makeStructural(e)
+    if (!rest.isEmpty)
+      throw new IllegalStateException("Expected empty rest list")
+    Abstract.Prg("main_var", exp)
+  }
+  
+  def makeStructural(e: Exp): (Abstract.Exp, Exp) = 
+    if (e.head == Zero)
+      (Abstract.Zero(), e.next)
+    else if (e.head == One)
+      (Abstract.One(), e.next)
+    else if (e.head == MainVar)
+      (Abstract.Var("main_var"), e.next)
+    else if (e.head == FoldNext)
+      (Abstract.Var("fold_next"), e.next)
+    else if (e.head == FoldAcc)
+      (Abstract.Var("fold_acc"), e.next)
+    else if (e.head == IfZero) {
+      val (cond, rest1) = makeStructural(e.next)
+      val (yes, rest2)  = makeStructural(rest1)
+      val (no, rest3)   = makeStructural(rest2)
+      (Abstract.IfZero(cond, yes, no), rest3)
+    }
+    else if (e.head == Fold) {
+      val (over, rest1) = makeStructural(e.next)
+      val (init, rest2)  = makeStructural(rest1)
+      val (body, rest3)   = makeStructural(rest2)
+      (Abstract.Fold(over, init, Abstract.FoldFun("fold_next", "fold_acc", body)), rest3)
+    }
+    else {
+      val (e1, rest1) = makeStructural(e.next)
+      tryGetUnaryOp(e.head) match {
+        case Some(op) => (Abstract.UApp(op, e1), rest1)
+        case None => tryGetBinaryOp(e.head) match {
+          case Some(op) => {
+            val (e2, rest2) = makeStructural(rest1)
+            (Abstract.BApp(op, e1, e2), rest2)
+          }
+          case None => sys.error("illegal operator " + e.head)
+        }
+      }
+    } 
+  
+  def tryGetUnaryOp(n: Node) = n match {
+    case Not => Some(Abstract.Operator.Not)
+    case Shl1 => Some(Abstract.Operator.Shl1)
+    case Shr1 => Some(Abstract.Operator.Shr1)
+    case Shr4 => Some(Abstract.Operator.Shr4)
+    case Shr16 => Some(Abstract.Operator.Shr16)
+    case _ => None
+  }
+
+  def tryGetBinaryOp(n: Node) = n match {
+    case And => Some(Abstract.Operator.And)
+    case Or => Some(Abstract.Operator.Or)
+    case Xor => Some(Abstract.Operator.Xor)
+    case Plus => Some(Abstract.Operator.Plus)
+    case _ => None
+  }
+}
+
+
 
 object Concrete {
   
