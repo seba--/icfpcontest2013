@@ -10,6 +10,6 @@ trait Filter {
   def init(spec: ProblemSpec): Unit
   // notify about new evaluation data, will be already registered in problem spec
   def notifyNewData(data: Map[Long, Long]): Unit
-  // reject expression if return true
+  // keep all expressions that satisfy the predicate
   def filter(e: Exp): Boolean
 }

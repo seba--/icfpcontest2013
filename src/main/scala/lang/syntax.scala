@@ -46,9 +46,26 @@ object FlatAbstract {
     val IfZero, Fold, FoldNext, FoldAcc = Value
     val Not, Shl1, Shr1, Shr4, Shr16 = Value
     val And, Or, Xor, Plus = Value
+    val TFold = Value
   }
   type Node = Node.Value
   import Node._
+  
+  def getNode(s: String) = s match {
+    case "not" => Not
+    case "shl1" => Shl1
+    case "shr1" => Shr1
+    case "shr4" => Shr4
+    case "shr16" => Shr16
+    case "and" => And
+    case "or" => Or
+    case "xor" => Xor
+    case "plus" => Plus
+    case "if0" => IfZero
+    case "fold" => Fold
+    case "tfold" => TFold
+  }
+
   
   type Exp = DoubleLinkedList[Node]
   

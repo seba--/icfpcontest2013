@@ -15,11 +15,12 @@ object LinearMutator extends Mutator {
   
   def notifyNewData(data: Map[Long, Long]): Unit = {}
   
-  def mutate(e: Exp): Exp = {
+  def mutate(e: Exp): Option[Exp] = {
     if (e.size == 0)
-      DoubleLinkedList(Zero)
+      Some(DoubleLinkedList(Zero))
     else
-      mutateAtPosition(e, specs.operators, e.size - 1)
+      // TODO check: if mutateAtPosition can fail, it should return Option[Exp]
+      Some(mutateAtPosition(e, specs.operators, e.size - 1))
   }
   
   def mutateAtPosition(e : Exp, op: List[Node], pos: Int) : Exp = {

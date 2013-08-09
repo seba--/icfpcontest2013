@@ -11,6 +11,6 @@ trait Mutator {
   def init(spec: ProblemSpec): Unit
   // notify about new evaluation data, will be already registered in problem spec
   def notifyNewData(data: Map[Long, Long]): Unit
-  // get mutated version of program
-  def mutate(e: Exp): Exp
+  // get mutated version of program, or None if no valid mutation is possible
+  def mutate(e: Exp): Option[Exp]
 }
