@@ -9,7 +9,6 @@ object JsonParser {
   val mapper = new ObjectMapper()
   mapper.registerModule(DefaultScalaModule)
 
-  def parseProblem(json: String) = mapper.readValue(json, classOf[TrainingProblem])
-  def parseEvalResponse(json: String) = mapper.readValue(json, classOf[EvalResponse])
+  def deserialize[T](json: String, clazz: Class[T]): T = mapper.readValue(json, clazz)
   def serialize(someObject : Any) = mapper.writeValueAsString(someObject)
 }

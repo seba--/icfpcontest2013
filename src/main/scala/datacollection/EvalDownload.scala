@@ -9,6 +9,7 @@ import scala.collection.SortedMap
 import scala.collection.mutable.Queue
 import java.io.File
 import com.sun.xml.internal.bind.v2.TODO
+import model.EvalResponse
 
 object EvalDownload extends BotApp {
   def requestEvalResults(problem: TrainingProblem, inputs: List[String]): List[(String, String)] = requestEvalResults(problem.id, inputs)
@@ -16,7 +17,7 @@ object EvalDownload extends BotApp {
   def requestEvalResults(id: String, arguments: List[String]): List[(String, String)] = {
     val request = EvalRequest(id, arguments);
     val result = IcfpcHttpCommunication.post("eval", JsonParser.serialize(request))
-    arguments.zip(JsonParser.parseEvalResponse(result).get)
+    arguments.zip(JsonParser.deserialize(result, classOf[EvalResponse]).get)
   }
 
   val inputStore = TrainingProblemStore.default

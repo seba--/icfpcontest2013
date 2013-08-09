@@ -63,20 +63,6 @@ object TrainingProblemStatistics extends App {
 //  }
 //  for(bla <- result) println(bla)
   
-  println(JsonParser.parseProblem("""{
-    "id": "06BADBLM1Y1LJ9u1NjpKfQ3d",
-    "size": 15,
-    "operators": [
-        "fold",
-        "if0",
-        "or",
-        "plus",
-        "shl1",
-        "shr4"
-    ]
-}
-"""))
-  
 //  val sums = sum(result)
 //  csvPrint("all", sums.all)
 //  csvPrint("withFold", sums.withFold)
