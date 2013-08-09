@@ -31,6 +31,9 @@ object Semantics {
   def try_eval(p: Prg)(v: Value): Option[Value] =
     try { Some(eval(p)(v)) } catch { case EmptyBox() => None }
 
+  def eval(e: lang.FlatAbstract.Exp)(v: Value): Value =
+    eval(lang.FlatAbstract.makeStructuralPrg(e))(v)
+    
   def eval(p: Prg)(v: Value): Value =
     new Eval((p.x -> v)).eval(p.e)
 
