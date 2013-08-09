@@ -1,7 +1,5 @@
 package lang
 
-import scala.util.Either
-
 object Abstract {
   
   type Id = String
@@ -153,6 +151,23 @@ object Concrete {
     else
       None
   }
+  
+  def tryParseOperator(s: String): Option[Operator] =
+    tryParseUnary(s) match {
+      case Some((op,_)) => Some(op)
+      case None => tryParseBinary(s) match {
+        case Some((op,_)) => Some(op)
+        case None =>
+          if (s == "if0")
+            Some(Operator.If0)
+          else if (s == "fold")
+            Some(Operator.Fold)
+          else if (s == "tfold")
+            Some(Operator.TFold)
+          else
+            None
+      }
+    }
 
   def parseFoldFun(s: String): Result[FoldFun] = {
     val (_, s1) = word("lambda")(layout(s))
