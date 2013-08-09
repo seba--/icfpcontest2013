@@ -1,3 +1,4 @@
+package lang
 
 import scala.util.Either
 
@@ -39,7 +40,7 @@ object Concrete {
   type Error = String
   type Result[A] = Either[(A, String), Error]
   
-  def parse(s: String) = parsePrg(s)
+  def parse(s: String): Result[Prg] = parsePrg(s)
   
   def parsePrg: String => Result[Prg] =
     inParens(s => {
