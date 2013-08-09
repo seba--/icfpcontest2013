@@ -6,11 +6,11 @@ import lang.Semantics._
 import scala.collection.mutable
 
 object Tester extends App {
-  println(new Solver(1, List()).solve(Map(1l -> 0l, 2l -> 0l, 3l -> 0l)) + " == " + Zero())
-  println(new Solver(1, List()).solve(Map(1l -> 1l, 2l -> 1l, 3l -> 1l)) + " == " + One())
+  println(new SvenSolver(1, List()).solve(Map(1l -> 0l, 2l -> 0l, 3l -> 0l)) + " == " + Zero())
+  println(new SvenSolver(1, List()).solve(Map(1l -> 1l, 2l -> 1l, 3l -> 1l)) + " == " + One())
 }
 
-class Solver(size : Int, operators: List[Operator]) {
+class SvenSolver(size : Int, operators: List[Operator]) {
 
   private var restSize = size
   private val solution = Box()
