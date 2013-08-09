@@ -23,6 +23,13 @@ object Abstract {
   case class Fold(over: Exp, init: Exp, f: FoldFun) extends Exp { override def toString = "(fold " + over+ " " + init + " " + f + ")" }
   case class UApp(op: Operator, e: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e + ")" }
   case class BApp(op: Operator, e1: Exp, e2: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e1 + " " + e2 + ")" }
+  case class Box() extends Exp {
+    var e : Exp = null
+    def isEmpty : Boolean = e == null    
+    override def toString = {
+      if (isEmpty) "?" else e.toString()
+    }
+  }
   
   final case class FoldFun(next: Id, acc: Id, body: Exp) { 
     override def toString = "(lambda (" + next + " " + acc + ") " + body + ")" 

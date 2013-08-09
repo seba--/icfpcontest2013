@@ -7,6 +7,7 @@ object Semantics {
   
   case class UnboundVariable(x: Id) extends Exception
   case class UnexpectedOperator(expected: String, op: Operator) extends Exception
+  case class EmptyBox() extends Exception
   
   type Value = Long
   type Var = (Id, Value)
@@ -19,6 +20,7 @@ object Semantics {
     private var foldAcc: Option[Var] = None
     
     def eval(e: Exp): Value = e match {
+      case b@Box() => if (b.isEmpty) throw new EmptyBox() else eval(b.e)
       case Zero() => 0L
       case One() => 1L
       case Var(x) =>

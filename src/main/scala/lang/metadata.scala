@@ -7,6 +7,7 @@ object Metadata {
   def size(p: Prg): Int = 1 + size(p.e)
   
   def size(e: Exp): Int = e match {
+    case b@Box() => if (b.isEmpty) 0 else size(b.e)
     case Zero() => 1
     case One() => 1
     case Var(_) => 1
@@ -25,6 +26,7 @@ object Metadata {
   }
   
   def ops(e: Exp): Set[Operator] = e match {
+    case b@Box() => if (b.isEmpty) Set() else ops(b.e)
     case Zero() => Set()
     case One() => Set()
     case Var(_) => Set()
