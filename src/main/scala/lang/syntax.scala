@@ -18,18 +18,22 @@ object Abstract {
   import Binary._
   type Binary = Binary.Value
 
-  case class Prg(x: Id, e: Exp)
+  case class Prg(x: Id, e: Exp) { 
+    override def toString = "(lambda (" + x + ") " + e + ")" 
+  }
   
   abstract class Exp
-  case class Zero() extends Exp
-  case class One() extends Exp
-  case class Var(x: Id) extends Exp
-  case class IfZero(cond: Exp, yes: Exp, no: Exp) extends Exp
-  case class Fold(over: Exp, init: Exp, f: FoldFun) extends Exp
-  case class UApp(op: Unary, e: Exp) extends Exp
-  case class BApp(op: Binary, e1: Exp, e2: Exp) extends Exp
+  case class Zero() extends Exp { override def toString = "0" }
+  case class One() extends Exp { override def toString = "1" }
+  case class Var(x: Id) extends Exp { override def toString = x }
+  case class IfZero(cond: Exp, yes: Exp, no: Exp) extends Exp { override def toString = "(if0 " + cond + " " + yes + " " + no + ")" }
+  case class Fold(over: Exp, init: Exp, f: FoldFun) extends Exp { override def toString = "(fold " + over+ " " + init + " " + f + ")" }
+  case class UApp(op: Unary, e: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e + ")" }
+  case class BApp(op: Binary, e1: Exp, e2: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e1 + " " + e2 + ")" }
   
-  final case class FoldFun(next: Id, acc: Id, body: Exp)
+  final case class FoldFun(next: Id, acc: Id, body: Exp) { 
+    override def toString = "(lambda (" + next + " " + acc + ") " + body + ")" 
+  }
   
 }
 
