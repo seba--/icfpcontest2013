@@ -1,0 +1,1 @@
+{"id":"pearFltrBHNCYrA6RCSXYb4Z","size":11,"operators":["if0","not","plus","shr1","shr16","shr4"],"challenge":"(lambda (x_11727) (shr1 (if0 (plus (shr4 (shr16 (not x_11727))) x_11727) 1 x_11727)))"}

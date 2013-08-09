@@ -1,0 +1,1 @@
+{"id":"umlsQgSxrfrbAXWthLPtuSbX","size":12,"operators":["if0","or","plus","shr16","shr4"],"challenge":"(lambda (x_12530) (shr4 (plus (if0 (or (shr16 (shr16 0)) x_12530) 0 1) x_12530)))"}

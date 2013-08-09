@@ -27,12 +27,12 @@ object TrainingProblemStatistics extends App {
     val p = new java.io.PrintWriter(new File(name + ".csv"))
 
     p.print("stats")
-    for (col <- minOps until maxOps) {
+    for (col <- minOps to maxOps) {
       p.print(";" + col + " ops")
     }
-    for (row <- minSize until maxSize) {
+    for (row <- minSize to maxSize) {
       p.print("\r\n size " + row)
-      for (col <- minOps until maxOps) {
+      for (col <- minOps to maxOps) {
         p.print(";" + map(row)(col).size)
       }
     }
