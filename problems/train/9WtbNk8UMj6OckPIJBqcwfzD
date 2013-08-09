@@ -1,0 +1,16 @@
+{
+    "id": "9WtbNk8UMj6OckPIJBqcwfzD",
+    "size": 15,
+    "operators": [
+        "and",
+        "if0",
+        "not",
+        "shr1",
+        "shr4",
+        "xor"
+    ],
+    "challenge": "(lambda (x_17941) (not (and (shr4 (xor (if0 (xor x_17941 (shr4 (shr1 x_17941))) 1 1) x_17941)) x_17941)))"
+}
+
+### shorter solution: (lambda (x) (not (and x (shr4 x))))
+### hence the problems were generated automatically and the (best or shortest) solutions might be even simpler and may contain only a subset of the given operators.
