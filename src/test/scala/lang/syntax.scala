@@ -10,19 +10,26 @@ class ParserSuite extends FunSuite {
   
   test("id function") {
     val res = parse("(lambda (x) x)")
-    assert(res === Left((Prg("x", Var("x")))))
+    assert(res === ((Prg("x", Var("x")), "")))
   }
 }
 
 class TrainingDataParserSuite extends FunSuite {
 
   import lang.Concrete.parse
+  import lang.Concrete.ParseException
   
   test("training data") {
     for (id <- TrainingProblemStore.ids) {
       val prob = TrainingProblemStore.read(id)
-      val result = parse(prob.challenge)
-      assert(result.isLeft, result)
+      try {
+        parse(prob.challenge)
+      } catch {
+        case ParseException(msg, str) =>
+          println("FAILED " + id)
+          assert(false, msg + ", was: " + str)
+      }
+      println("OK " + id)
     }
   }
 }
