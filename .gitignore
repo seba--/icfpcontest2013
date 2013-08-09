@@ -1,4 +1,5 @@
 # sbt specific
+.cache
 .project
 .classpath
 .settings/
