@@ -1,0 +1,1 @@
+{"id":"QTnSgBERUuHZD5RKkrTlnIsb","size":7,"operators":["plus","shl1"],"challenge":"(lambda (x_5702) (plus (plus x_5702 (shl1 1)) 1))"}

@@ -4,6 +4,7 @@ import java.io.File
 import java.text.DateFormat
 import java.text.SimpleDateFormat
 import java.util.Date
+import http.HttpCommunication
 
 object DownloadTrainProblem extends App {
   val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
@@ -21,7 +22,7 @@ object DownloadTrainProblem extends App {
   while (true) {
     try {
       log("Attempting download..")
-      val json = TrainingProblemDownloader.downloadOneInstance();
+      val json = HttpCommunication.get("train");
       val parsed = JsonParser.parse(json);
 
       TrainingProblemStore.write(parsed);
