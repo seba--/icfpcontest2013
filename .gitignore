@@ -1,1 +1,10 @@
-bin/
+# sbt specific
+.project
+.classpath
+.settings/
+dist/*
+target/
+lib_managed/
+src_managed/
+project/boot/
+project/plugins/project/
