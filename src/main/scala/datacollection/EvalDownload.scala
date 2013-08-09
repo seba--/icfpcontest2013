@@ -8,6 +8,7 @@ import lang.Semantics
 import scala.collection.SortedMap
 import scala.collection.mutable.Queue
 import java.io.File
+import com.sun.xml.internal.bind.v2.TODO
 
 object EvalDownload extends BotApp {
   def requestEvalResults(problem: TrainingProblem, inputs: List[String]): List[(String, String)] = requestEvalResults(problem.id, inputs)
@@ -26,6 +27,7 @@ object EvalDownload extends BotApp {
     (id =>
       if (!targetStore.contains(id)) toDownload += inputStore.read(id))
   }
+  log("Starting: " + toDownload.size + " problems in queue")
 
   while (!toDownload.isEmpty) {
     val problem = toDownload.dequeue()
@@ -40,7 +42,7 @@ object EvalDownload extends BotApp {
       }
       val updatedProblem = problem.copy(evaluationResults = updatedResults)
       targetStore.write(updatedProblem);
-      log("wrote problem:" + problem.id)
+      log("done problem: " + problem.id + ", " + toDownload + " items left.")
       wait(5)
     } catch {
       case e: Exception =>
