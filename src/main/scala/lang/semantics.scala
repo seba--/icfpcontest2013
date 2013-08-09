@@ -43,12 +43,12 @@ object Semantics {
       case Zero() => 0L
       case One() => 1L
       case Var(x) =>
-        if (x == in._1)
-          in._2
-        else if (foldNext.isDefined && x == foldNext.get._1)
+        if (foldNext.isDefined && x == foldNext.get._1)
           foldNext.get._2
         else if (foldAcc.isDefined && x == foldAcc.get._1)
           foldAcc.get._2
+        else if (x == in._1)
+          in._2
         else
           throw UnboundVariable(x)
 
@@ -63,13 +63,13 @@ object Semantics {
       case Fold(over, init, FoldFun(next, acc, body)) => {
         val v = eval(over)
         val b0 = (v & 0x00000000000000FFL)
-        val b1 = (v & 0x000000000000FF00L) >> 8
-        val b2 = (v & 0x0000000000FF0000L) >> 16
-        val b3 = (v & 0x00000000FF000000L) >> 24
-        val b4 = (v & 0x000000FF00000000L) >> 32
-        val b5 = (v & 0x0000FF0000000000L) >> 40
-        val b6 = (v & 0x00FF000000000000L) >> 48
-        val b7 = (v & 0xFF00000000000000L) >> 56
+        val b1 = (v & 0x000000000000FF00L) >>> 8
+        val b2 = (v & 0x0000000000FF0000L) >>> 16
+        val b3 = (v & 0x00000000FF000000L) >>> 24
+        val b4 = (v & 0x000000FF00000000L) >>> 32
+        val b5 = (v & 0x0000FF0000000000L) >>> 40
+        val b6 = (v & 0x00FF000000000000L) >>> 48
+        val b7 = (v & 0xFF00000000000000L) >>> 56
 
         foldAcc = Some(acc -> eval(init))
 
@@ -101,9 +101,9 @@ object Semantics {
         op match {
           case Operator.Not => ~v
           case Operator.Shl1 => v << 1
-          case Operator.Shr1 => v >> 1
-          case Operator.Shr4 => v >> 4
-          case Operator.Shr16 => v >> 16
+          case Operator.Shr1 => v >>> 1
+          case Operator.Shr4 => v >>> 4
+          case Operator.Shr16 => v >>> 16
           case _ => throw UnexpectedOperator("unary", op)
         }
       }
