@@ -1,6 +1,7 @@
 package lang
 
 import lang.Abstract._
+import lang.Concrete._
 
 object Semantics {
   
@@ -32,7 +33,7 @@ object Semantics {
     
       case IfZero(cond, yes, no) => {
         val cval = eval(cond)
-        if (cval == Long.MinValue)
+        if (cval == 0)
           eval(yes)
         else
           eval(no)
