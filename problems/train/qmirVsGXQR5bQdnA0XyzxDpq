@@ -1,0 +1,1 @@
+{"id":"qmirVsGXQR5bQdnA0XyzxDpq","size":8,"operators":["or","plus"],"challenge":"(lambda (x_7097) (plus (or (plus 0 x_7097) 1) 1))"}

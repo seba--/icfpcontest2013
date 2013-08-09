@@ -1,0 +1,1 @@
+{"id":"Box6AmyKFXxKodDSJIMPPEtU","size":10,"operators":["and","if0","not","plus"],"challenge":"(lambda (x_9416) (if0 (and (not (plus x_9416 1)) 1) 1 x_9416))"}

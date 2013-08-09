@@ -1,0 +1,1 @@
+{"id":"CTyFMbwscMaxST2AC5DpLR2L","size":9,"operators":["shr1","tfold","xor"],"challenge":"(lambda (x_3793) (fold x_3793 0 (lambda (x_3793 x_3794) (xor (shr1 x_3794) x_3793))))"}
