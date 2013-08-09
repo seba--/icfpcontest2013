@@ -1,12 +1,12 @@
-package solver
+package lang
 
-import datacollection.TrainingProblemStore
 import java.io.File
-import lang.Concrete
-import lang.Semantics
+
 import scala.collection.SortedMap
 
-object TestSolve extends App {
+import datacollection.TrainingProblemStore
+
+object TestEvaluator extends App {
   // MODIFY THIS TO WHATEVER YOU NEED!
   val store = new TrainingProblemStore(new File("problems/trainWith0to255eval"))
   
