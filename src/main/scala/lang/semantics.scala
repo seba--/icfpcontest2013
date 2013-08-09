@@ -12,6 +12,9 @@ object Semantics {
   type Value = Long
   type Var = (Id, Value)
   
+  def try_eval(p: Prg)(v: Value): Option[Value] =
+    try { Some(eval(p)(v)) } catch { case EmptyBox() => None }
+  
   def eval(p: Prg)(v: Value): Value = 
     new Eval((p.x -> v)).eval(p.e)
   
