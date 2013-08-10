@@ -10,7 +10,7 @@ object Test extends App {
     val store = new TrainingProblemStore(new File("problems/trainWith0to255eval"))
     val problems = store.ids().map(store.read(_))
     val filteredProblems = problems.filter(p => p.size <= 10)
-    val evaluator = new CountCorrectInputsEvaluator(filteredProblems)
+    val evaluator = new CountCorrectInputsEvaluator(filteredProblems.map(client.api.Problem(_)))
     evaluator.evaluate(new BruteForceSizeFilteredSolver)
 //
 //  val dataSet = new DefaultXYDataset()

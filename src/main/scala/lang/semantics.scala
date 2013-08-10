@@ -28,6 +28,7 @@ object Semantics {
       case _ => java.lang.Long.parseLong(s.substring(2), 16)
     }
   }
+  def fromStringList(s: Seq[String]) : Seq[Value] = s.map(fromString(_))
 
   def try_eval(p: Exp)(v: Value): Option[Value] =
     try { Some(eval(p)(v)) } catch { case EmptyBox() => None }

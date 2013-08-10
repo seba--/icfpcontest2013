@@ -2,8 +2,6 @@ package json
 
 import com.fasterxml.jackson.databind.ObjectMapper
 import com.fasterxml.jackson.module.scala.DefaultScalaModule
-import model.TrainingProblem
-import model.EvalResponse
 
 object JsonParser {
   val mapper = new ObjectMapper()

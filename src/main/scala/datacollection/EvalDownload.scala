@@ -1,7 +1,5 @@
 package datacollection
 
-import model.TrainingProblem
-import model.EvalRequest
 import http.IcfpcHttpCommunication
 import json.JsonParser
 import lang.Semantics
@@ -9,26 +7,27 @@ import scala.collection.SortedMap
 import scala.collection.mutable.Queue
 import java.io.File
 import com.sun.xml.internal.bind.v2.TODO
-import model.EvalResponse
 import BotApp._
+import server.api.ProblemResponse
+import server.api.IcfpcServer
+import server.api.EvalRequest
 
 object EvalDownload extends App {
-  def requestEvalResults(problem: TrainingProblem, inputs: Seq[String]): Seq[(String, String)] = requestEvalResults(problem.id, inputs)
+  def requestEvalResults(problem: ProblemResponse, inputs: Seq[String]): Seq[(String, String)] = requestEvalResults(problem.id, inputs)
 
   def requestEvalResultsInLong(id: String, arguments: Seq[Long]): Seq[(Long, Long)] = {
-    requestEvalResults(id, Semantics.toStringList(arguments)).map{
-        case (in, out) => Semantics.fromString(in) -> Semantics.fromString(out)}
+    requestEvalResults(id, Semantics.toStringList(arguments)).map {
+      case (in, out) => Semantics.fromString(in) -> Semantics.fromString(out)
+    }
   }
-  
+
   def requestEvalResults(id: String, arguments: Seq[String]) = {
-    val request = EvalRequest(id, arguments);
-    val result = IcfpcHttpCommunication.post("eval", JsonParser.serialize(request))
-    arguments.zip(JsonParser.deserialize(result, classOf[EvalResponse]).get)
+    arguments.zip(IcfpcServer.eval(new EvalRequest(id, arguments)).get)
   }
 
   def doDownloads(inputStore: TrainingProblemStore, targetStore: TrainingProblemStore, requests: Iterable[Long]) {
     val translatedRequests = requests.toList.map { Semantics.toString(_) }
-    val toDownload = Queue[TrainingProblem]()
+    val toDownload = Queue[ProblemResponse]()
     inputStore.ids().foreach {
       (id =>
         if (!targetStore.contains(id)) toDownload += inputStore.read(id))

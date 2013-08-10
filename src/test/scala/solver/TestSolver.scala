@@ -7,12 +7,11 @@ import solver.solvers.BruteForceSizeFilteredSolver
 import datacollection.TrainingProblemStore
 import java.io.File
 import lang.Concrete
-import model.Problem
-import model.TrainingProblem
+import client.api.Problem
 
 case class TestSolver(solver: Solver) {
 
-  def testSolve(spec: ProblemSpec): Int = {
+  def testSolve(spec: Problem): Int = {
     solver.init(spec)
 
     var sol: Option[Exp] = None
@@ -23,7 +22,7 @@ case class TestSolver(solver: Solver) {
 
       if (sol.isDefined) {
         solCount += 1
-        spec.data.foreach {
+        spec.evaluationResults.foreach {
           case (input, output) =>
             val result = Semantics.eval(sol.get)(input)
             if (result != output) {
@@ -40,25 +39,18 @@ case class TestSolver(solver: Solver) {
 class BruteForceSizeFilteredSolverTest extends FunSuite {
   val store = TrainingProblemStore(new File("problems/trainWith0to255eval"))
 
-  test("bgCBAh2b5uf94sB6zuq2mXwG") {
-    testProblem(store.read("bgCBAh2b5uf94sB6zuq2mXwG"))
-  }
 
-//    test("BruteForceSizeFilteredSolver") {
-//      store.allProblems.foreach { problem =>
-//        testProblem(problem)
-//      }
-//    }
+    test("BruteForceSizeFilteredSolver") {
+      store.allProblems.foreach { problem =>
+        testProblem(client.api.Problem(problem))
+      }
+    }
 
-  def testProblem(problem: TrainingProblem) {
-    val ops = problem.operators.map(lang.Concrete.tryParseOperator(_).get)
-    val data = problem.evaluationResults.map({ case (x, y) => (Semantics.fromString(x), Semantics.fromString(y)) })
-    val spec = ProblemSpec(problem.id, problem.size, ops, data)
-
+  def testProblem(problem: Problem) {
     println("TEST " + problem.id)
 
     val tester = TestSolver(new BruteForceSizeFilteredSolver)
-    tester.testSolve(spec)
+    tester.testSolve(problem)
 
     println("SOLVED " + problem.id)
   }

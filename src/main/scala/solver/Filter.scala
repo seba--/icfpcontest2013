@@ -19,13 +19,13 @@ object FilterV {
   val OK = 0
   val STEP_INTO = 1
   val STEP_OVER = 2
-  def max_(v: Int, f:(Exp) => Int, e: Exp): Int = {
+  def max(v: Int, f:(Exp) => Int, e: Exp): Int = {
     if (v == STEP_OVER)
       STEP_OVER
     else
       Math.max(v, f(e))
   }
-  def max(f1:(Exp) => Int, f2:(Exp) => Int, e:Exp): Int = {
-    max_(f1(e), f2, e)
+  def max_(f1:(Exp) => Int, f2:(Exp) => Int, e:Exp): Int = {
+    max(f1(e), f2, e)
   }
 }
