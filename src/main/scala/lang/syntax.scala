@@ -10,6 +10,7 @@ object Abstract {
     val Not, Shl1, Shr1, Shr4, Shr16 = Value
     val And, Or, Xor, Plus = Value
     val If0, Fold, TFold = Value
+    val Bonus = Value
   }
   type Operator = Operator.Value
 
@@ -244,6 +245,9 @@ object Concrete {
         (MainVar(), s2)
       else throw ParseException("Unbound variable " + x, s2)
     }
+    else if (s.size > 0 && s(0) == '?') {
+      (Box(), s.substring(1))
+    }
     else
       inParens(parseExp1(mainVar, foldNext, foldVar))(s)
   
@@ -332,6 +336,8 @@ object Concrete {
             Some(Operator.Fold)
           else if (s == "tfold")
             Some(Operator.TFold)
+          else if (s == "bonus")
+            Some(Operator.Bonus)
           else
             None
       }
