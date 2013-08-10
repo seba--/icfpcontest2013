@@ -26,9 +26,10 @@ case class TestSolver(solver: Solver) {
         spec.data.foreach {
           case (input, output) =>
             val result = Semantics.eval(sol.get)(input)
-            if (result != output)
+            if (result != output) {
               println(s"Solver failed for problem ${spec.id} on input $input, expected: $output, but was: " + Semantics.toString(result))
-            println(s"Proposed solution was $sol")
+              println(s"Proposed solution was $sol")
+            }
         }
       }
     } while (sol.isDefined)
