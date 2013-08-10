@@ -40,16 +40,16 @@ case class TestSolver(solver: Solver) {
 class BruteForceSizeFilteredSolverTest extends FunSuite {
   val store = TrainingProblemStore(new File("problems/trainWith0to255eval"))
 
-//  test("4n75sUkFvpQxpD3zhSTQg7mE") {
-//    testProblem(store.read("4n75sUkFvpQxpD3zhSTQg7mE"))
-//  }
-
+  test("03dMrc1C9TLG8lNLiFFmYsyT") {
+    testProblem(store.read("03dMrc1C9TLG8lNLiFFmYsyT"))
+  }
+/*
     test("BruteForceSizeFilteredSolver") {
       store.allProblems.foreach { problem =>
         testProblem(problem)
       }
     }
-
+*/
   def testProblem(problem: TrainingProblem) {
     val ops = problem.operators.map(lang.Concrete.tryParseOperator(_).get)
     val data = problem.evaluationResults.map({ case (x, y) => (Semantics.fromString(x), Semantics.fromString(y)) })
