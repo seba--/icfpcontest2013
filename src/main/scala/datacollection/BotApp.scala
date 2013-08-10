@@ -3,7 +3,7 @@ package datacollection
 import java.text.SimpleDateFormat
 import java.util.Date
 
-class BotApp extends App {
+object BotApp {
   val dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS")
   def log(text: String) {
     println("[%s] %s".format(dateFormat.format(new Date()), text))
