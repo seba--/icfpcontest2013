@@ -20,19 +20,21 @@ class ValidFoldFilter extends Filter {
     // ignore
   }
 
+
+  var hasFold = false
   def filter(e: Exp): Int = {
+    hasFold = false
     filter(e, false)
   }
+
 
   def filter(e: Exp, inFold: Boolean): Int = {
     e match {
       case IfZero(cond, e1, e2) => Math.max(filter(cond, inFold), Math.max(filter(e1, inFold), filter(e2, inFold)))
+      case Fold(over, init, body) if hasFold => FilterV.STEP_OVER
       case Fold(over, init, body) => {
-        if (inFold)
-          FilterV.STEP_OVER
-        else {
-          Math.max(filter(over, true), Math.max(filter(init, true), filter(body, true))) 
-        }
+        hasFold = true
+        Math.max(filter(over, true), Math.max(filter(init, true), filter(body, true)))
       }
       case FoldNext() => if (inFold) FilterV.OK else FilterV.STEP_INTO
       case FoldAcc() => if (inFold) FilterV.OK else FilterV.STEP_INTO

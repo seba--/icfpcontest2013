@@ -24,10 +24,12 @@ class BruteForceInitialDataStrategy extends Strategy {
     while (true) {
       if (!next.isDefined)
         return None
-      
-//      println(current)
-      
+
       current = next.get
+
+//      if (current.isInstanceOf[Fold])
+//        println(current)
+      
       filter.filter(current) match {
         case FilterV.OK => return next
         case FilterV.STEP_INTO => next = mutator.stepInto(current)

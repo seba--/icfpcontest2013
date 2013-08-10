@@ -17,6 +17,12 @@ class ParserSuite extends FunSuite {
     assert(res === MainVar())
   }
 
+
+  test("pretty printing") {
+    val s = "(lambda (main_var) (fold main_var 0 (lambda (fold_next fold_acc) (plus fold_next fold_acc))))"
+    parseAndAssertSerialization("main_var", s)
+  }
+
   // unknown parsing
 
   test("simplest partial programm") {
@@ -78,8 +84,12 @@ class ParserSuite extends FunSuite {
   }
 
   def parseAndAssertSerialization(p: String) {
+    parseAndAssertSerialization("x", p)
+  }
+
+  def parseAndAssertSerialization(mainvar : String, p: String) {
     val res = parse(p)
-    val serial = "(lambda (x) " + res.toString() + ")"
+    val serial = "(lambda ("+mainvar+") " + res.toString() + ")"
     assert(p === serial)
   }
 }

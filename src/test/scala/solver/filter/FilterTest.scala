@@ -35,4 +35,12 @@ abstract class FilterTest extends FunSuite with BeforeAndAfter {
   def assertDenies(program: String) {
     assert(filterUnderTest.filter(parse(program)) != FilterV.OK)
   }
+
+  def assertStepInto(program: String) {
+    assert(filterUnderTest.filter(parse(program)) == FilterV.STEP_INTO)
+  }
+
+  def assertStepOver(program: String) {
+    assert(filterUnderTest.filter(parse(program)) == FilterV.STEP_OVER)
+  }
 }

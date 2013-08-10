@@ -1,43 +1,53 @@
 package solver
 
-import org.scalatest._
+import org.scalatest.FunSuite
+
 import lang.Abstract.Exp
+import solver.FilterV.STEP_INTO
+import solver.FilterV.STEP_OVER
+import solver.FilterV.max_
+import solver.FilterV.max
 
 class MaxFilterTest extends FunSuite {
+  val MAX_VALUE = STEP_OVER
+  val AVG_VALUE = STEP_INTO
+
+  def forbiddenFun(e: Exp): Int = {
+    println("missed")
+    fail
+  }
+
+  def maxFun(e: Exp): Int = {
+    MAX_VALUE
+  }
+
+  def avgFun(e: Exp): Int = {
+    AVG_VALUE
+  }
 
   test("take the first") {
-    val v = 2
-    def f(e:Exp) : Int = {
-      println("missed")
-      fail
-    }
-    println(solver.FilterV.max_(v, f, null))
+    assert(max(MAX_VALUE, forbiddenFun, null) == STEP_OVER)
   }
-  
+
   test("calculate max") {
-    val v = 1
-    def f(e:Exp) : Int = {
-      println("check")
-      2
-    }
-    assert(solver.FilterV.max_(v, f, null) == solver.FilterV.STEP_OVER)
+    assert(max(AVG_VALUE, maxFun, null) == STEP_OVER)
   }
-  
+
   test("take the first 2") {
-    def v(e:Exp) = {2}
-    def f(e:Exp) : Int = {
-      println("missed")
-      fail
-    }
-    println(solver.FilterV.max(v, f, null))
+    assert(max_(maxFun, forbiddenFun, null) == STEP_OVER)
   }
-  
+
   test("calculate max 2") {
-    def v(e:Exp) = {2}
-    def f(e:Exp) : Int = {
-      println("check")
-      2
-    }
-    assert(solver.FilterV.max(v, f, null) == solver.FilterV.STEP_OVER)
+    assert(max_(avgFun, maxFun, null) == STEP_OVER)
+  }
+
+  test("fold take the first") {
+    val seq: List[(Exp) => Int] = List(maxFun, forbiddenFun, forbiddenFun)
+    assert(seq.foldLeft(0)((curr, next) => max(curr, next, null)) == STEP_OVER)
+  }
+
+  test("fold calculate max") {
+    val seq: List[(Exp) => Int] = List(avgFun, maxFun, forbiddenFun)
+    assert(seq.foldLeft(0)((curr, next) => max(curr, next, null)) == STEP_OVER)
   }
 }

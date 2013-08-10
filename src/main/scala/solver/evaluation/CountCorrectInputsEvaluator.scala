@@ -38,8 +38,11 @@ object EvaluationResultCounter {
 
 class CountCorrectInputsEvaluator(problems: Iterable[Problem]) extends SolverEvaluator {
   override def evaluate(solver: Solver) {
+    var i = 0
     var correct = 0
     problems.map(problem => problem -> {
+      i += 1
+      log("Test " + i + " of " + problems.size)
       val solCount = evaluate(problem, solver)
       if (solCount > 0)
         correct += 1
