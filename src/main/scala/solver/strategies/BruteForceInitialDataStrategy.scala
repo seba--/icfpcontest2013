@@ -11,7 +11,7 @@ import scala.collection.mutable.DoubleLinkedList
 class BruteForceInitialDataStrategy extends Strategy {
   var current = DoubleLinkedList[Node]()
   
-  def notifyNewData(data: Map[Long, Long]) {
+  def notifyNewData(delta: Map[Long, Long]) {
     // reset: this solver requires full initial data
     current = DoubleLinkedList[Node]()
   }
