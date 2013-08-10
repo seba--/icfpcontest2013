@@ -21,6 +21,10 @@ class DoubleFoldFilterTest extends FilterTest {
     assertDenies("(lambda (x) (fold x 0 (lambda (y z) (fold y 1 (lambda (a b) (plus a b))))))")
   }
   
+  test("denies nested nested folds") {
+    assertDenies("(lambda (x) (plus 1 (fold x 0 (lambda (y z) (fold y 1 (lambda (a b) (plus a b)))))))")
+  }
+  
   test("denies sibling folds") {
     assertDenies("(lambda (x) (and (fold x x (lambda (x y) x)) (fold x x (lambda (x y) x))))")
   }
