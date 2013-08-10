@@ -7,6 +7,7 @@ import solver.ProblemSpec
 import solver.Mutator
 import lang.Abstract._
 import scala.collection.mutable.DoubleLinkedList
+import lang.Metadata
 
 class BruteForceInitialDataStrategy extends Strategy {
   var current: Exp = Box()
@@ -23,9 +24,13 @@ class BruteForceInitialDataStrategy extends Strategy {
       if (!next.isDefined)
         return None
       current = next.get
-      if (filter.filter(current))
+      val complete = Metadata.isComplete(current)
+      if (complete && filter.filter(current))
         return next
-      next = mutator.stepOver(current)
+      else if (complete)
+        next = mutator.stepOver(current)
+      else
+        next = mutator.stepInto(current)
     }
     next
   }

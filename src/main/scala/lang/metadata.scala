@@ -44,5 +44,18 @@ object Metadata {
   def hasTopFold(e: Exp) = e match {
     case Fold(MainVar(), Zero(), _) => true
     case _ => false
-  } 
+  }
+  
+  def isComplete(e: Exp): Boolean = e match {
+    case b@Box() => if (b.isEmpty) false else isComplete(b.e)
+    case Zero() => true 
+    case One() => true
+    case MainVar() => true
+    case FoldNext() => true
+    case FoldAcc() => true
+    case IfZero(cond, yes, no) => isComplete(cond) && isComplete(yes) && isComplete(no)
+    case Fold(over, init, body) => isComplete(over) && isComplete(init) && isComplete(body)
+    case UApp(op, e) => isComplete(e)
+    case BApp(op, e1, e2) => isComplete(e1) && isComplete(e2)
+  }
 }

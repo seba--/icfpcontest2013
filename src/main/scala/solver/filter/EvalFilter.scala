@@ -22,9 +22,12 @@ class EvalFilter extends Filter {
 
   def filter(e: Exp): Boolean = {
     try {
-      return evaluate(e)
+      evaluate(e)
     } catch {
-      case _: Exception => return false
+      case EmptyBox() => true
+      case ex: Exception => {
+        false
+      }
     }
   }
 
