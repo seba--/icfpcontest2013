@@ -10,6 +10,7 @@ object Abstract {
     val Not, Shl1, Shr1, Shr4, Shr16 = Value
     val And, Or, Xor, Plus = Value
     val If0, Fold, TFold = Value
+    val Bonus = Value
   }
   type Operator = Operator.Value
 
@@ -335,6 +336,8 @@ object Concrete {
             Some(Operator.Fold)
           else if (s == "tfold")
             Some(Operator.TFold)
+          else if (s == "bonus")
+            Some(Operator.Bonus)
           else
             None
       }
