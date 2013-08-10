@@ -244,6 +244,9 @@ object Concrete {
         (MainVar(), s2)
       else throw ParseException("Unbound variable " + x, s2)
     }
+    else if (s.size > 0 && s(0) == '?') {
+      (Box(), s.substring(1))
+    }
     else
       inParens(parseExp1(mainVar, foldNext, foldVar))(s)
   
