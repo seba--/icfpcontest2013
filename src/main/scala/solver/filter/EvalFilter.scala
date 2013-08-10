@@ -2,7 +2,7 @@ package solver.filter
 
 import solver.Filter
 import solver.ProblemSpec
-import lang.FlatAbstract._
+import lang.Abstract._
 import lang.Semantics._
 
 /**

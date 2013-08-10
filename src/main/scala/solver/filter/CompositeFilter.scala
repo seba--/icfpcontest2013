@@ -2,7 +2,7 @@ package solver.filter
 
 import solver.Filter
 import solver.ProblemSpec
-import lang.FlatAbstract._
+import lang.Abstract._
 
 class CompositeFilter(filters: List[Filter]) extends Filter {
 	
