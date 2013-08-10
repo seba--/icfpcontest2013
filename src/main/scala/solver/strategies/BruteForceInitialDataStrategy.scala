@@ -18,12 +18,15 @@ class BruteForceInitialDataStrategy extends Strategy {
 
   // Find next solution, or return None.
   def nextSolution(): Option[Exp] = {
-    val next = mutator.mutate(current)
-    if (!next.isDefined)
-      return None
-    current = next.get
-    if (!filter.filter(current))
-      return next
-    return nextSolution()
+    var next = mutator.stepInto(current)
+    while (true) {
+      if (!next.isDefined)
+        return None
+      current = next.get
+      if (filter.filter(current))
+        return next
+      next = mutator.stepOver(current)
+    }
+    next
   }
 }
