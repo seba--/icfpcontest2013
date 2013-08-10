@@ -18,14 +18,20 @@ case class TrainingProblemStore(folder: File) {
   }
 
   def read(id: String) = {
-    JsonParser.deserialize(scala.io.Source.fromFile(new File(folder, id)).mkString, classOf[ProblemResponse])
+    try {
+      JsonParser.deserialize(scala.io.Source.fromFile(new File(folder, id)).mkString, classOf[ProblemResponse])
+    } catch {
+      case e: Exception =>
+        println(id)
+        throw e
+    }
   }
 
   def contains(id: String) = {
     new File(folder, id).isFile()
   }
 
-  def ids() = folder.list();
+  def ids() = folder.list().filterNot(_.startsWith("."));
 
   def allProblems() = ids.map { read(_) }
 }
