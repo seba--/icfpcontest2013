@@ -10,7 +10,7 @@ trait Filter {
   def init(spec: ProblemSpec): Unit
   // notify about new evaluation data, will be already registered in problem spec
   def notifyNewData(data: Map[Long, Long]): Unit
-  
+
   // keep all expressions that satisfy the predicate
   def filter(e: Exp): Int
 }
@@ -18,5 +18,14 @@ trait Filter {
 object FilterV {
   val OK = 0
   val STEP_INTO = 1
-  val STEP_OVER = 2  
+  val STEP_OVER = 2
+  def max_(v: Int, f:(Exp) => Int, e: Exp): Int = {
+    if (v == STEP_OVER)
+      STEP_OVER
+    else
+      Math.max(v, f(e))
+  }
+  def max(f1:(Exp) => Int, f2:(Exp) => Int, e:Exp): Int = {
+    max_(f1(e), f2, e)
+  }
 }

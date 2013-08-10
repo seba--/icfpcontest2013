@@ -25,9 +25,10 @@ case class TestSolver(solver: Solver) {
         spec.evaluationResults.foreach {
           case (input, output) =>
             val result = Semantics.eval(sol.get)(input)
-            if (result != output)
+            if (result != output) {
               println(s"Solver failed for problem ${spec.id} on input $input, expected: $output, but was: " + Semantics.toString(result))
-            println(s"Proposed solution was $sol")
+              println(s"Proposed solution was $sol")
+            }
         }
       }
     } while (sol.isDefined)
@@ -38,15 +39,15 @@ case class TestSolver(solver: Solver) {
 class BruteForceSizeFilteredSolverTest extends FunSuite {
   val store = TrainingProblemStore(new File("problems/trainWith0to255eval"))
 
-  test("4n75sUkFvpQxpD3zhSTQg7mE") {
-    testProblem(store.read("4n75sUkFvpQxpD3zhSTQg7mE").toClientProblem)
-  }
+//  test("4n75sUkFvpQxpD3zhSTQg7mE") {
+//    testProblem(store.read("4n75sUkFvpQxpD3zhSTQg7mE").toClientProblem)
+//  }
 
-  //  test("BruteForceSizeFilteredSolver") {
-  //    store.allProblems.foreach { problem =>
-  //      testProblem(problem)
-  //    }
-  //  }
+    test("BruteForceSizeFilteredSolver") {
+      store.allProblems.foreach { problem =>
+        testProblem(problem.toClientProblem)
+      }
+    }
 
   def testProblem(problem: Problem) {
     println("TEST " + problem.id)

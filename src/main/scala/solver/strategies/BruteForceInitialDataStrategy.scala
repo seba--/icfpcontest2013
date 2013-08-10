@@ -25,7 +25,7 @@ class BruteForceInitialDataStrategy extends Strategy {
       if (!next.isDefined)
         return None
       
-      println(current)
+//      println(current)
       
       current = next.get
       filter.filter(current) match {

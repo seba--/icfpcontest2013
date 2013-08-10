@@ -76,6 +76,7 @@ object LinearMutator extends Mutator {
                 }
               else {
                 ifExp.cond = newExp.get
+                newLastModified = newExp
                 Left(ifExp)
               }
             }
@@ -98,6 +99,7 @@ object LinearMutator extends Mutator {
                     }
                   else {
                     ifExp.yes = newExp.get
+                    newLastModified = newExp
                     Left(ifExp)
                   }
                 }
@@ -112,6 +114,7 @@ object LinearMutator extends Mutator {
                         Right(true)
                       else {
                         ifExp.no = newExp.get
+                        newLastModified = newExp
                         Left(ifExp)
                       }
                     }
@@ -147,6 +150,7 @@ object LinearMutator extends Mutator {
                 }
               else {
                 fold.over = newExp.get
+                newLastModified = newExp
                 Left(fold)
               }
             }
@@ -169,6 +173,7 @@ object LinearMutator extends Mutator {
                     }
                   else {
                     fold.init = newExp.get
+                    newLastModified = newExp
                     Left(fold)
                   }
                 }
@@ -183,6 +188,7 @@ object LinearMutator extends Mutator {
                         Right(true)
                       else {
                         fold.body = newExp.get
+                        newLastModified = newExp
                         Left(fold)
                       }
                     }
@@ -203,6 +209,7 @@ object LinearMutator extends Mutator {
                 Right(true)
               else {
                 uExp.e = newExp.get
+                newLastModified = newExp
                 Left(uExp)
               }
             }
@@ -227,6 +234,7 @@ object LinearMutator extends Mutator {
                 }
               else {
                 bExp.e1 = newExp.get
+                newLastModified = newExp
                 Left(bExp)
               }
             }
@@ -241,6 +249,7 @@ object LinearMutator extends Mutator {
                     Right(true)
                   else {
                     bExp.e2 = newExp.get
+                    newLastModified = newExp
                     Left(bExp)
                   }
                 }
