@@ -23,7 +23,7 @@ abstract class Strategy {
     fitness.init(spec)
   }
   // notify about new evaluation data, will be already registered in problem spec
-  def notifyNewData(data: Map[Long, Long]): Unit
+  def notifyNewData(delta: Map[Long, Long]): Unit
   // Find next solution, or return None.
   def nextSolution(): Option[Exp]
 }

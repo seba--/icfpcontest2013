@@ -6,7 +6,7 @@ import lang.FlatAbstract.Node._
 import scala.collection.mutable.DoubleLinkedList
 import solver.mutators.LinearMutator
 
-class EnumeratorTest extends FunSuite {
+class LinearMutatorTest extends FunSuite {
   test("nextNode") {
     val seq = List[Node](And, Or, Xor)
     LinearMutator.init(new ProblemSpec("", 10, seq, null))
