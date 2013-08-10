@@ -1,6 +1,7 @@
 package solver.filter
 
 import solver.Filter
+import solver.FilterV._
 import solver.ProblemSpec
 import lang.Abstract._
 
@@ -14,7 +15,8 @@ class CompositeFilter(filters: List[Filter]) extends Filter {
 	  filters.foreach(_.notifyNewData(data))
 	}
 	
-	//returns true if all contained filters return true, false otherwise
-	def filter(e : Exp): Int = 
-	  filters.foldRight(0)((f,y) => Math.max(f.filter(e),y))
+	//returns the maximum result using shortcut-evaluation
+	//do not replace foldLeft by FoldRight
+	def filter(e : Exp): Int =
+	  filters.foldLeft(OK)((curr, next) => max(curr, next.filter, e))
 }
