@@ -26,7 +26,7 @@ object MutatorUtils {
     case One() => Some(MainVar())
     case MainVar() => Some(FoldNext())
     case FoldNext() => Some(FoldAcc())
-    case FoldAcc() => Some(IfZero(Box(), Box(), Box()))
+    case FoldAcc() => Some(getMinimalExpressionForOperator(ops.head))
     case _ => {
       val op = getOperator(e).get
       val pos = ops.indexOf(op)
