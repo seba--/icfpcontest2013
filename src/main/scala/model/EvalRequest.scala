@@ -2,8 +2,9 @@ package model
 
 import datacollection.TrainingProblemStore
 import java.io.FileNotFoundException
+import lang.Semantics
 
-case class EvalRequest(id: String, arguments: List[String]) {
+case class EvalRequest(id: String, arguments: Seq[String]) {
   try{
     TrainingProblemStore.default.read(id);
   } catch {

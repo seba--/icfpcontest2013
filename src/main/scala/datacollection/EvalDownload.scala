@@ -13,9 +13,14 @@ import model.EvalResponse
 import BotApp._
 
 object EvalDownload extends App {
-  def requestEvalResults(problem: TrainingProblem, inputs: List[String]): List[(String, String)] = requestEvalResults(problem.id, inputs)
+  def requestEvalResults(problem: TrainingProblem, inputs: Seq[String]): Seq[(String, String)] = requestEvalResults(problem.id, inputs)
 
-  def requestEvalResults(id: String, arguments: List[String]): List[(String, String)] = {
+  def requestEvalResultsInLong(id: String, arguments: Seq[Long]): Seq[(Long, Long)] = {
+    requestEvalResults(id, Semantics.toStringList(arguments)).map{
+        case (in, out) => Semantics.fromString(in) -> Semantics.fromString(out)}
+  }
+  
+  def requestEvalResults(id: String, arguments: Seq[String]) = {
     val request = EvalRequest(id, arguments);
     val result = IcfpcHttpCommunication.post("eval", JsonParser.serialize(request))
     arguments.zip(JsonParser.deserialize(result, classOf[EvalResponse]).get)
@@ -44,13 +49,13 @@ object EvalDownload extends App {
         val updatedProblem = problem.copy(evaluationResults = updatedResults)
         targetStore.write(updatedProblem);
         log("done problem: " + problem.id + ", " + toDownload.size + " items left.")
-        wait(4)
+        sleep(4)
       } catch {
         case e: Exception =>
           log("Exception: " + e.getMessage())
           // requeue for later processing
           toDownload += problem
-          wait(1)
+          sleep(1)
       }
     }
   }
@@ -64,6 +69,6 @@ object EvalDownload extends App {
 
   val tempStore = TrainingProblemStore(new File("problems/trainWith0to255eval"))
   val finalStore = TrainingProblemStore(new File("problems/train3"))
-//  doDownloads(TrainingProblemStore.default, tempStore, 0L to 255L)
+  doDownloads(TrainingProblemStore.default, tempStore, 0L to 255L)
   doDownloads(tempStore, finalStore, requests)
 }

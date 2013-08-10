@@ -12,6 +12,8 @@ object Semantics {
   type Value = Long
 
   def toString(v: Value): String = "0x%016X".format(v)
+  def toStringList(coll : Seq[Value]) : Seq[String] = coll.map(toString(_))
+  
   def fromString(s: String): Value = {
     val rest = s.substring(3)
     s.charAt(2) match {
