@@ -7,7 +7,7 @@ import lang.Concrete.parse
 import solver.ProblemSpec
 import lang.Abstract.Operator
 import lang.Abstract.Operator._
-import scala.collection.mutable.Map
+import scala.collection.immutable.Map
 
 abstract class FilterTest extends FunSuite with BeforeAndAfter {
 
