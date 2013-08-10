@@ -8,7 +8,7 @@ object BotApp {
   def log(text: String) {
     println("[%s] %s".format(dateFormat.format(new Date()), text))
   }
-  def wait(seconds: Int) {
+  def sleep(seconds: Int) {
     log("Waiting %d seconds..".format(seconds))
     val waitUntil = System.currentTimeMillis() + seconds * 1000;
     while (System.currentTimeMillis() < waitUntil) {

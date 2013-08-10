@@ -19,7 +19,7 @@ object DownloadTrainProblem extends App {
     } catch {
       case e: Exception =>
         log("Exception: " + e.getMessage())
-        wait(1)
+        sleep(1)
     }
   }
 }
