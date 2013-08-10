@@ -7,7 +7,7 @@ import datacollection.BotApp
 import javax.swing.WindowConstants
 
 object Test extends App {
-    val store = new TrainingProblemStore(new File("problems/train3"))
+    val store = new TrainingProblemStore(new File("problems/trainWith0to255eval"))
     val evaluator = new CountCorrectInputsEvaluator(((store.ids()).take(10).map(store.read(_))))
     evaluator.evaluate(new BruteForceSizeFilteredSolver)
 //
