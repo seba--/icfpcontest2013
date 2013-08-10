@@ -25,8 +25,7 @@ class BruteForceInitialDataStrategy extends Strategy {
       if (!next.isDefined)
         return None
 
-      if (next.get.toString.startsWith("(fold"))
-        println(current)
+//      println(current)
       
       current = next.get
       filter.filter(current) match {
