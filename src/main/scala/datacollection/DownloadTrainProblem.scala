@@ -3,14 +3,14 @@ package datacollection
 import json.JsonParser
 import BotApp._
 import http.IcfpcHttpCommunication
-import model.TrainingProblem
+import server.api.Problem
 
 object DownloadTrainProblem extends App {
   while (true) {
     try {
       log("Attempting download..")
       val json = IcfpcHttpCommunication.get("train");
-      val parsed = JsonParser.deserialize(json, classOf[TrainingProblem]);
+      val parsed = JsonParser.deserialize(json, classOf[Problem]);
 
       TrainingProblemStore.default.write(parsed);
       log("wrote problem:" + parsed.id)

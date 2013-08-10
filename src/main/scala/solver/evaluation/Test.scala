@@ -7,10 +7,9 @@ import datacollection.BotApp
 import javax.swing.WindowConstants
 
 object Test extends App {
-    val store = new TrainingProblemStore(new File("problems/trainWith0to255eval"))
-    val problems = store.ids().map(store.read(_))
-    val filteredProblems = problems.filter(p => p.size <= 25)
-    val evaluator = new CountCorrectInputsEvaluator(filteredProblems)
+    val store = new TrainingProblemStore(new File("problems/train3"))
+    val filteredProblems = store.allProblems.filter(p => p.size <= 8)
+    val evaluator = new CountCorrectInputsEvaluator(filteredProblems.map(client.api.Problem(_)))
     evaluator.evaluate(new BruteForceSizeFilteredSolver)
 //
 //  val dataSet = new DefaultXYDataset()
