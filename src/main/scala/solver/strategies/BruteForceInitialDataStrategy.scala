@@ -27,8 +27,8 @@ class BruteForceInitialDataStrategy extends Strategy {
 
       current = next.get
 
-      if (current.isInstanceOf[Fold])
-        println(current)
+//      if (current.isInstanceOf[Fold])
+//        println(current)
       
       filter.filter(current) match {
         case FilterV.OK => return next
