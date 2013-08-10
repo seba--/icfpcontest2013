@@ -17,6 +17,8 @@ class BruteForceSizeFilteredSolver extends Solver {
     strategy.init(spec, LinearMutator, new SizeFilter, ConstantFitness(1.0))
   }
   
+  def notifyNewData(delta: Map[Long, Long]) = strategy.notifyNewData(delta)
+
   def nextSolution(): Option[Exp] =
     strategy.nextSolution
 }
