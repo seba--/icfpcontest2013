@@ -10,6 +10,10 @@ trait Mutator {
   def init(spec: ProblemSpec): Unit
   // notify about new evaluation data, will be already registered in problem spec
   def notifyNewData(data: Map[Long, Long]): Unit
-  // get mutated version of program, or None if no valid mutation is possible
-  def mutate(e: Exp): Option[Exp]
+  
+  // continue mutating this version of the program; return None if no valid mutation is possible
+  def stepInto(e: Exp): Option[Exp]
+
+  // the argument program is invalid: skip it and produce another mutation; return None if no valid mutation is possible
+  def stepOver(e: Exp): Option[Exp]
 }

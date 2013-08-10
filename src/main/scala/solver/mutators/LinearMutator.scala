@@ -14,7 +14,9 @@ object LinearMutator extends Mutator {
   
   def notifyNewData(data: Map[Long, Long]): Unit = {}
   
-  def mutate(e: Exp): Option[Exp] = null 
+  def stepInto(e: Exp): Option[Exp] = null
+  def stepOver(e: Exp): Option[Exp] = null
+  
 //  {
 //    if (e.size == 0)
 //      Some(DoubleLinkedList(Zero))
