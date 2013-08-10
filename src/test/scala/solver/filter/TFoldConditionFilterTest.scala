@@ -22,6 +22,11 @@ class TFoldConditionFilterTest extends FilterTest {
     assertDenies("(lambda (x) (fold x 0 (lambda (x y) x)))")
   }
 
+  test("fold is accepted as first node if no tnode is given because 1 != 0") {
+    initFilterWithOps(And, Or)
+    assertAccepts("(lambda (x) (fold x 1 (lambda (x y) x)))")
+  }
+
   test("correct tfold should be accepted") {
     initFilterWithOps(TFold)
     assertAccepts("(lambda (x) (fold x 0 (lambda (x y) x)))")

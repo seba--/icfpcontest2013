@@ -1,6 +1,7 @@
 package solver.filter
 
 import solver.Filter
+import solver.FilterV
 import solver.ProblemSpec
 import lang.Abstract._
 import lang.Abstract.Operator._
@@ -14,16 +15,16 @@ class IdentityOpFilter extends Filter {
   def notifyNewData(data: Map[Long, Long]): Unit = {}
 
   // keep all expressions that satisfy the predicate
-  def filter(e: Exp): Boolean = {
+  def filter(e: Exp): Int = {
     e match {
-      case BApp(Plus, Zero(), _) => false
-      case BApp(Plus, _, Zero()) => false
-      case BApp(And, Zero(), _) => false
-      case BApp(And, _, Zero()) => false
-      case BApp(Or, Zero(), _) => false
-      case BApp(Or, _, Zero()) => false
-      case UApp(Not, UApp(Not, _)) => false
-      case _ => true
+      case BApp(Plus, Zero(), _) => FilterV.STEP_INTO
+      case BApp(Plus, _, Zero()) => FilterV.STEP_INTO
+      case BApp(And, Zero(), _) => FilterV.STEP_INTO
+      case BApp(And, _, Zero()) => FilterV.STEP_INTO
+      case BApp(Or, Zero(), _) => FilterV.STEP_INTO
+      case BApp(Or, _, Zero()) => FilterV.STEP_INTO
+      case UApp(Not, UApp(Not, _)) => FilterV.STEP_INTO
+      case _ => FilterV.OK
     }
   }
 }

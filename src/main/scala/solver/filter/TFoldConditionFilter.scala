@@ -1,7 +1,6 @@
 package solver.filter
 
 import scala.collection.immutable.Map
-
 import lang.Abstract.BApp
 import lang.Abstract.Box
 import lang.Abstract.Exp
@@ -13,6 +12,7 @@ import lang.Abstract.UApp
 import lang.Abstract.Zero
 import solver.Filter
 import solver.ProblemSpec
+import solver.FilterV
 
 /**
  * Ensures that, if the problem specification names tfold as one of the operators,
@@ -31,10 +31,10 @@ class TFoldConditionFilter extends Filter {
     // ignore
   }
 
-  def filter(e: Exp): Boolean = if (isTFold) {
-    filterTFold(e)
+  def filter(e: Exp): Int = if (isTFold) {
+    if (filterTFold(e)) FilterV.OK else FilterV.STEP_OVER
   } else {
-    filterFirstFold(e)
+    if(filterFirstFold(e)) FilterV.OK else FilterV.STEP_OVER
   }
 
   def filterTFold(e: Exp): Boolean = e match {
@@ -44,7 +44,7 @@ class TFoldConditionFilter extends Filter {
   }
 
   def filterFirstFold(e: Exp): Boolean = e match {
-    case Fold(_, _, _) => false
+    case Fold(MainVar(), Zero(), _) => false
     case _ => true
   }
 

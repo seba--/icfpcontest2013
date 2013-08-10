@@ -1,7 +1,7 @@
 package solver.filter
 
-import scala.collection.mutable.DoubleLinkedList
 import solver.Filter
+import solver.FilterV
 import scala.collection.immutable.Map
 import solver.ProblemSpec
 import lang.Abstract._
@@ -21,13 +21,13 @@ class ConstantFoldingFilter extends Filter {
     // ignore
   }
 
-  def filter(e: Exp): Boolean = e match {
-      case IfZero(cond, e1, e2) => !isConst(cond) && filter(e1) && filter(e2) 
-      case Fold(over, init, body) => !isConst(body) && filter(over) && filter(init) && filter(body)
+  def filter(e: Exp): Int = e match {
+      case IfZero(cond, e1, e2) => if (!isConst(cond)) Math.max(filter(e1), filter(e2)) else FilterV.STEP_INTO
+      case Fold(over, init, body) => if(!isConst(body)) Math.max(filter(over), Math.max(filter(init), filter(body))) else FilterV.STEP_INTO
       case UApp(op, e1) => filter(e1)
-      case BApp(op, e1, e2) => filter(e1) && filter(e2)
-      case b@Box() => if (b.isEmpty) true else filter(b.e)
-      case _ => true
+      case BApp(op, e1, e2) => Math.max(filter(e1), filter(e2))
+      case b@Box() => if (b.isEmpty) FilterV.OK else filter(b.e)
+      case _ => FilterV.OK
   }
   
   def isConst(e: Exp) : Boolean = e match {

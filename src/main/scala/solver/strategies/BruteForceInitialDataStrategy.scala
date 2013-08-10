@@ -8,6 +8,7 @@ import solver.Mutator
 import lang.Abstract._
 import scala.collection.mutable.DoubleLinkedList
 import lang.Metadata
+import solver.FilterV
 
 class BruteForceInitialDataStrategy extends Strategy {
   var current: Exp = Box()
@@ -23,14 +24,15 @@ class BruteForceInitialDataStrategy extends Strategy {
     while (true) {
       if (!next.isDefined)
         return None
+      
+      println(current)
+      
       current = next.get
-      val complete = Metadata.isComplete(current)
-      if (complete && filter.filter(current))
-        return next
-      else if (complete)
-        next = mutator.stepOver(current)
-      else
-        next = mutator.stepInto(current)
+      filter.filter(current) match {
+        case FilterV.OK => return next
+        case FilterV.STEP_INTO => next = mutator.stepInto(current)
+        case FilterV.STEP_OVER => next = mutator.stepOver(current)
+      }
     }
     next
   }

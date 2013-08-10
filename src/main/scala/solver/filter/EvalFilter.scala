@@ -1,6 +1,7 @@
 package solver.filter
 
 import solver.Filter
+import solver.FilterV
 import solver.ProblemSpec
 import lang.Abstract._
 import lang.Semantics._
@@ -20,13 +21,16 @@ class EvalFilter extends Filter {
     // ignore
   }
 
-  def filter(e: Exp): Boolean = {
+  def filter(e: Exp): Int = {
     try {
-      evaluate(e)
+      if (evaluate(e))
+        FilterV.OK
+      else 
+        FilterV.STEP_INTO
     } catch {
-      case EmptyBox() => true
+      case EmptyBox() => FilterV.OK
       case ex: Exception => {
-        false
+        FilterV.STEP_INTO
       }
     }
   }

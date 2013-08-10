@@ -8,6 +8,7 @@ import solver.ProblemSpec
 import lang.Abstract.Operator
 import lang.Abstract.Operator._
 import scala.collection.immutable.Map
+import solver.FilterV
 
 abstract class FilterTest extends FunSuite with BeforeAndAfter {
 
@@ -28,10 +29,10 @@ abstract class FilterTest extends FunSuite with BeforeAndAfter {
   }
   
   def assertAccepts(program: String) {
-    assert(filterUnderTest.filter(parse(program)))
+    assert(filterUnderTest.filter(parse(program)) == FilterV.OK)
   }
   
   def assertDenies(program: String) {
-    assert(!filterUnderTest.filter(parse(program)))
+    assert(filterUnderTest.filter(parse(program)) != FilterV.OK)
   }
 }

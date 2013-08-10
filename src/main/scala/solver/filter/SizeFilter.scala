@@ -1,6 +1,7 @@
 package solver.filter
 
 import solver.Filter
+import solver.FilterV
 import scala.collection.immutable.Map
 import solver.ProblemSpec
 import lang.Abstract._
@@ -19,6 +20,6 @@ class SizeFilter extends Filter {
   }
 
   // keep expressions with valid size
-  def filter(e: Exp): Boolean =
-    size(e) <= spec.size
+  def filter(e: Exp): Int =
+    if (size(e) <= spec.size) FilterV.OK else FilterV.STEP_OVER
 }

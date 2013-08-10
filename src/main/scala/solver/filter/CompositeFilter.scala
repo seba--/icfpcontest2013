@@ -15,6 +15,6 @@ class CompositeFilter(filters: List[Filter]) extends Filter {
 	}
 	
 	//returns true if all contained filters return true, false otherwise
-	def filter(e : Exp): Boolean = 
-	  filters.forall(_.filter(e))
+	def filter(e : Exp): Int = 
+	  filters.foldRight(0)((f,y) => Math.max(f.filter(e),y))
 }
