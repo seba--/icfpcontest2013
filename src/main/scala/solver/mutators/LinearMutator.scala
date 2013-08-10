@@ -15,6 +15,10 @@ object LinearMutator extends Mutator {
   
   def notifyNewData(data: Map[Long, Long]): Unit = {}
   
+  def stepOver(e: Exp): Option[Exp] = {
+    None
+  }
+  
   def stepInto(e: Exp): Option[Exp] = {
     e match {
       case b@Box() => if (b.isEmpty) Some(Zero()) else stepInto(b.e)
