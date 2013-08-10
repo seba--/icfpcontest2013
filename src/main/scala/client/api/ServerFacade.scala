@@ -11,9 +11,23 @@ import json.JsonParser
 import com.fasterxml.jackson.core.JsonFactory
 import java.io.File
 import datacollection.TrainingProblemStore
+import lang.Concrete
 
 case class Problem(id: String, size: Int, operators: List[Operator], solved: Boolean, timeLeft: Int, evaluationResults: Map[Long, Long], challenge: Exp)
-
+object Problem {
+  def apply(problem: server.api.Problem): Problem = {
+    val evaluationResultsAsLong = problem.evaluationResults.map {
+      case (in, out) => Semantics.fromString(in) -> Semantics.fromString(out)
+    }
+    val operatorsToOperators = problem.operators.map {
+      Concrete.tryParseOperator(_).get
+    }
+    val challengeToExp = {
+      if (problem.challenge == null) null else Concrete.parse(problem.challenge)
+    }
+    Problem(problem.id, problem.size, operatorsToOperators, problem.solved, problem.timeLeft, evaluationResultsAsLong, challengeToExp)
+  }
+}
 sealed trait GuessResponse
 case object Win extends GuessResponse
 case class Mismatch(input: Value, correct: Value, wrong: Value) extends GuessResponse
@@ -38,11 +52,11 @@ class ServerFacade(theServer: Server) {
     val myProblems = JsonParser.mapper.readValues(parser, classOf[server.api.Problem])
     var result = List[Problem]()
     while (myProblems.hasNext()) {
-      result ::= myProblems.next().toClientProblem
+      result ::= client.api.Problem(myProblems.next())
     }
     result
   }
-  val trainingProblems: Seq[Problem] = trainingStore.allProblems.map{_.toClientProblem}
+  val trainingProblems: Seq[Problem] = trainingStore.allProblems.map { client.api.Problem(_) }
   def guess(id: String, program: Exp): GuessResponse = {
     GuessResponse(theServer.guess(new GuessRequest(id, program.toString)))
   }

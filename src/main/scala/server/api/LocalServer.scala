@@ -9,7 +9,7 @@ class LocalServer(store: TrainingProblemStore) extends Server {
     throw new UnsupportedOperationException
   }
   override def eval(request: EvalRequest): EvalResponse = {
-    val problem = store.read(request.id).toClientProblem
+    val problem = client.api.Problem(store.read(request.id))
     EvalResponse("ok", request.arguments.toList.map { arg =>
       Semantics.toString(Semantics.eval(problem.challenge)(Semantics.fromString(arg)))
     }, null)

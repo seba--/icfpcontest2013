@@ -45,7 +45,7 @@ class BruteForceSizeFilteredSolverTest extends FunSuite {
 
     test("BruteForceSizeFilteredSolver") {
       store.allProblems.foreach { problem =>
-        testProblem(problem.toClientProblem)
+        testProblem(client.api.Problem(problem))
       }
     }
 
