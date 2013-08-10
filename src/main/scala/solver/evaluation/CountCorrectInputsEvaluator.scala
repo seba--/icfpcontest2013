@@ -38,13 +38,20 @@ object EvaluationResultCounter {
 
 class CountCorrectInputsEvaluator(problems: Iterable[TrainingProblem]) extends SolverEvaluator {
   override def evaluate(solver: Solver) {
-    problems.map(problem => problem -> evaluate(problem, solver))
+    var correct = 0
+    problems.map(problem => problem -> {
+      val solCount = evaluate(problem, solver)
+      if (solCount > 0)
+        correct += 1
+    })
+    log("Solved " + correct + " of " + problems.size)
   }
 
-  def evaluate(problem: TrainingProblem, solver: Solver) {
+  def evaluate(problem: TrainingProblem, solver: Solver) = {
     log("starting init for problem: %s, program size: %d, operators: %s".format(problem.id, problem.size, problem.operators))
     log("init took %dms".format(Benchmarked(solver.init(ProblemSpec(problem))).duration))
     var continue = true;
+    var count = 0
     do {
       continue = try {
         val benchmarked = Benchmarked(solver.nextSolution())
@@ -52,16 +59,19 @@ class CountCorrectInputsEvaluator(problems: Iterable[TrainingProblem]) extends S
           val evaled = new EvaluatedSolution(benchmarked.map { _.get }, problem)
           val EvaluationResultCounter(correct, wrong, crashed) = evaled.counts
           log("next solution took %dms, results: %d correct, %d wrong, %d crashed".format(benchmarked.duration, correct, wrong, crashed))
-          true
+          count += 1
+          count < 5
         } else {
           log("no more solutions, took %dms".format(benchmarked.duration))
           false
         }
       } catch {
         case e: Exception =>
+          e.printStackTrace()
           log("next solution crashed: %s(%s)".format(e.getClass.getSimpleName, e.getMessage()))
           false
       }
     } while (continue)
+    count
   }
 }

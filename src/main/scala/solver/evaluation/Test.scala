@@ -8,7 +8,9 @@ import javax.swing.WindowConstants
 
 object Test extends App {
     val store = new TrainingProblemStore(new File("problems/trainWith0to255eval"))
-    val evaluator = new CountCorrectInputsEvaluator(((store.ids()).take(10).map(store.read(_))))
+    val problems = store.ids().map(store.read(_))
+    val filteredProblems = problems.filter(p => p.size <= 25)
+    val evaluator = new CountCorrectInputsEvaluator(filteredProblems)
     evaluator.evaluate(new BruteForceSizeFilteredSolver)
 //
 //  val dataSet = new DefaultXYDataset()
