@@ -5,6 +5,9 @@ import org.scalatest.BeforeAndAfter
 import solver.Filter
 import lang.Concrete.parse
 import solver.ProblemSpec
+import lang.Abstract.Operator
+import lang.Abstract.Operator._
+import scala.collection.mutable.Map
 
 abstract class FilterTest extends FunSuite with BeforeAndAfter {
 
@@ -18,6 +21,10 @@ abstract class FilterTest extends FunSuite with BeforeAndAfter {
   
   def initFilter(spec: ProblemSpec) {
     filterUnderTest.init(spec)
+  }
+  
+  def initFilterWithOps(ops : Operator*) {
+	  initFilter(ProblemSpec("testId", 42, ops.toList, Map[Long,Long]()))
   }
   
   def assertAccepts(program: String) {

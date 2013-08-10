@@ -1,10 +1,18 @@
 package solver.filter
 
-import scala.collection.mutable.DoubleLinkedList
-import solver.Filter
 import scala.collection.immutable.Map
+
+import lang.Abstract.BApp
+import lang.Abstract.Box
+import lang.Abstract.Exp
+import lang.Abstract.Fold
+import lang.Abstract.IfZero
+import lang.Abstract.MainVar
+import lang.Abstract.Operator
+import lang.Abstract.UApp
+import lang.Abstract.Zero
+import solver.Filter
 import solver.ProblemSpec
-import lang.Abstract._
 
 /**
  * Ensures that, if the problem specification names tfold as one of the operators,
@@ -12,42 +20,48 @@ import lang.Abstract._
  * appears exactly once, as the argument of the fold).
  */
 class TFoldConditionFilter extends Filter {
-  var spec: ProblemSpec = null
+  
+  var isTFold : Boolean = false
 
   def init(spec: ProblemSpec) {
-    this.spec = spec
+    isTFold = spec.operators.contains(Operator.TFold)
   }
 
   def notifyNewData(delta: Map[Long, Long]) {
     // ignore
   }
 
-  def filter(e: Exp): Boolean = {
-    if (spec.operators.contains(Operator.TFold)) {
-      e match {
-        case Fold(over, init, body) =>
-          over == MainVar() && init == Zero() && !containsMainVar(body)
-        case _ => false
-      }
-    } else {
-      true
-    }
+  def filter(e: Exp): Boolean = if (isTFold) {
+    filterTFold(e)
+  } else {
+    filterFirstFold(e)
   }
-  
-  private def containsMainVar(e : Exp) : Boolean = e match {
-      case IfZero(cond, e1, e2) =>
-        containsMainVar(cond) && containsMainVar(e1) && containsMainVar(e2) 
-      case Fold(over, init, body) =>
-        containsMainVar(over) && containsMainVar(init) && containsMainVar(body)
-      case UApp(op, e1) =>
-        containsMainVar(e1)
-      case BApp(op, e1, e2) =>
-        containsMainVar(e1) && containsMainVar(e2)
-      case b@Box() =>
-        if (b.isEmpty) false else containsMainVar(b.e)
-      case MainVar() =>
-        true
-      case _ =>
-        false
-    }
+
+  def filterTFold(e: Exp): Boolean = e match {
+    case Fold(over, init, body) =>
+      over == MainVar() && init == Zero() && !containsMainVar(body)
+    case _ => false
+  }
+
+  def filterFirstFold(e: Exp): Boolean = e match {
+    case Fold(_, _, _) => false
+    case _ => true
+  }
+
+  private def containsMainVar(e: Exp): Boolean = e match {
+    case IfZero(cond, e1, e2) =>
+      containsMainVar(cond) && containsMainVar(e1) && containsMainVar(e2)
+    case Fold(over, init, body) =>
+      containsMainVar(over) && containsMainVar(init) && containsMainVar(body)
+    case UApp(op, e1) =>
+      containsMainVar(e1)
+    case BApp(op, e1, e2) =>
+      containsMainVar(e1) && containsMainVar(e2)
+    case b @ Box() =>
+      if (b.isEmpty) false else containsMainVar(b.e)
+    case MainVar() =>
+      true
+    case _ =>
+      false
+  }
 }
