@@ -12,15 +12,17 @@ import model.TrainingProblem
 
 case class TestSolver(solver: Solver) {
 
-  def testSolve(spec: ProblemSpec) {
+  def testSolve(spec: ProblemSpec): Int = {
     solver.init(spec)
 
     var sol: Option[Exp] = None
+    var solCount = 0
     do {
       sol = solver.nextSolution
       println("Found solution " + sol)
 
-      if (sol.isDefined)
+      if (sol.isDefined) {
+        solCount += 1
         spec.data.foreach {
           case (input, output) =>
             val result = Semantics.eval(sol.get)(input)
@@ -28,7 +30,9 @@ case class TestSolver(solver: Solver) {
               println(s"Solver failed for problem ${spec.id} on input $input, expected: $output, but was: " + Semantics.toString(result))
             println(s"Proposed solution was $sol")
         }
+      }
     } while (sol.isDefined)
+    return solCount
   }
 }
 
