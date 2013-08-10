@@ -30,4 +30,8 @@ class RegressionFilterTest extends FilterTest {
     assertAccepts("(lambda (x_4789) (fold x_4789 0 (lambda (x_4789 x_4790) (xor (shl1 x_4790) x_4789))))")
   }
 
+  test("accepts if with constant condition false") {
+    initFilterWithOps(TFold, Plus)
+    assertAccepts("(lambda (x_879) (fold x_879 0 (lambda (x_879 x_880) (plus x_880 x_879))))")
+  }
 }
