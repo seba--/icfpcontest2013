@@ -36,14 +36,18 @@ class SomeTests extends FunSuite {
   }
 
   test("0 to 255 for all downloaded training problems") {
+    println("START deserialization")
     val store = TrainingProblemStore(new File("problems/train3"))
-    store.allProblems.foreach { problem =>
+    val all = store.allProblems
+    println("FINISHED deserialization")
+    all.foreach { problem =>
+      println("Test " + problem.id)
       val program = Concrete.parse(problem.challenge)
+      if (problem.evaluationResults != null)
       problem.evaluationResults.foreach {
         case (input, output) =>
           val longInput = Semantics.fromString(input)
           val longOutput = Semantics.fromString(output)
-          println("Test " + problem.id)
           val result = Semantics.eval(program)(longInput)
           assert(result === longOutput, s"Failed: ${problem.id} with input $input, expected: $output, but was: "+Semantics.toString(result))
           println(s"ok: ${problem.id} with input $input")

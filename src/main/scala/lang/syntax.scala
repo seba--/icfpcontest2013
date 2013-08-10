@@ -222,12 +222,12 @@ object Concrete {
       (One(), s.substring(1))
     else if (s.size > 0 && (s(0) >= 'a' && s(0) <= 'z')) {
       val (x, s2) = parseId(s)
-      if (x == mainVar)
-        (MainVar(), s2)
-      else if (x == foldNext)
+      if (x == foldNext)
         (FoldNext(), s2)
       else if (x == foldVar)
         (FoldAcc(), s2)
+      else if (x == mainVar)
+        (MainVar(), s2)
       else throw ParseException("Unbound variable " + x, s2)
     }
     else
