@@ -17,7 +17,7 @@ import server.api.ProblemResponse
 case class Problem(id: String, size: Int, operators: List[Operator], solved: Boolean, timeLeft: Int, evaluationResults: Map[Long, Long], challenge: Exp)
 object Problem {
   def apply(problem: ProblemResponse): Problem = {
-    val evaluationResultsAsLong = problem.evaluationResults.map {
+    val evaluationResultsAsLong = if (problem.evaluationResults == null) null else problem.evaluationResults.map {
       case (in, out) => Semantics.fromString(in) -> Semantics.fromString(out)
     }
     val operatorsToOperators = problem.operators.map {

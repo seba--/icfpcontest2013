@@ -5,12 +5,14 @@ import datacollection.TrainingProblemStore
 import solver.solvers.BruteForceSizeFilteredSolver
 import datacollection.BotApp
 import javax.swing.WindowConstants
+import client.api.Problem
 
 object Test extends App {
     val store = new TrainingProblemStore(new File("problems/train3"))
-    val problems = store.ids().map(store.read(_))
-    val filteredProblems = problems.filter(p => p.size <= 10)
-    val evaluator = new CountCorrectInputsEvaluator(filteredProblems.map(client.api.Problem(_)))
+    val filteredProblems = store.allProblems.filter{p =>
+      p.size <= 10 && !p.operators.contains("tfold")
+    }
+    val evaluator = new CountCorrectInputsEvaluator(filteredProblems.map(Problem(_)))
     evaluator.evaluate(new BruteForceSizeFilteredSolver)
 //
 //  val dataSet = new DefaultXYDataset()
