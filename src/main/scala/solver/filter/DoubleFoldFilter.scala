@@ -11,6 +11,7 @@ import lang.Abstract._
  */
 class DoubleFoldFilter extends Filter {
   var spec: ProblemSpec = null
+  var hasFold: Boolean = false
 
   def init(spec: ProblemSpec) {
     this.spec = spec
@@ -21,16 +22,26 @@ class DoubleFoldFilter extends Filter {
   }
 
   def filter(e: Exp): Boolean = {
+    hasFold = false
     filter(e, false)
   }
-  
-  def filter(e: Exp, hasFold: Boolean): Boolean = {
+
+  def filter(e: Exp, inFold: Boolean): Boolean = {
     e match {
-      case IfZero(cond, e1, e2) => filter(cond, false) && filter(e1, false) && filter(e2, false) 
-      case Fold(over, init, body) => !hasFold && filter(over, true) && filter(init, true) && filter(body, true)
-      case UApp(op, e1) => filter(e1, false)
-      case BApp(op, e1, e2) => filter(e1, false) && filter(e2, false)
-      case b@Box() => if (b.isEmpty) true else filter(b.e, false)
+      case IfZero(cond, e1, e2) => filter(cond, inFold) && filter(e1, inFold) && filter(e2, inFold)
+      case Fold(over, init, body) => {
+        if (hasFold)
+          false
+        else {
+          hasFold = true
+          filter(over, inFold) && filter(init, inFold) && filter(body, true)
+        }
+      }
+      case FoldNext() => inFold
+      case FoldAcc() => inFold
+      case UApp(op, e1) => filter(e1, inFold)
+      case BApp(op, e1, e2) => filter(e1, inFold) && filter(e2, inFold)
+      case b @ Box() => if (b.isEmpty) true else filter(b.e, inFold)
       case _ => true
     }
   }
