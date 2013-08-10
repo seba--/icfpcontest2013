@@ -7,7 +7,7 @@ import java.io.FileNotFoundException
 import lang.Abstract
 import lang.Concrete
 
-case class Problem(id: String, size: Int, operators: List[String], solved: Boolean, timeLeft: Int, evaluationResults: Map[String, String], challenge: String)
+case class ProblemResponse(id: String, size: Int, operators: List[String], solved: Boolean, timeLeft: Int, evaluationResults: Map[String, String], challenge: String)
 
 case class EvalRequest(id: String, arguments: Seq[String]) {
   try{

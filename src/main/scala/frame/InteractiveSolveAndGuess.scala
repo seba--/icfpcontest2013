@@ -16,26 +16,26 @@ import client.api.Problem
 import lang.Semantics.Value
 import client.api._
 
-object InteractiveSolveAndGuess {
-  val server : ServerFacade = null
-  val problems = Queue[Problem]()
+class InteractiveSolveAndGuess (val server : ServerFacade, allProblems: Iterable[Problem]){
+  val problems = Queue[Problem]() ++ allProblems
   val numbers = Seq[Value]()
 
   def apply(solver: Solver) {
     while (!problems.isEmpty) {
-      val problem = problems.dequeue()
+      var problem = problems.dequeue()
       val iter = numbers.iterator
       def downloadNextEvalResults() = server.eval(problem.id, iter.take(256).toSeq)
 
       val timeout = System.currentTimeMillis() + 5 * 60 * 1000
       def timeLeft() = timeout - System.currentTimeMillis()
+      def sholdContinue() = !problem.solved && timeLeft() > 0
       
       val initialResults = downloadNextEvalResults()
       solver.init(problem)
       
       val solutions = Queue[Exp]()
 
-      while (timeLeft() > 0) {
+      while (sholdContinue()) {
         future {
           while (solver.nextSolution() match {
             case Some(e) =>
@@ -48,7 +48,7 @@ object InteractiveSolveAndGuess {
           }) {}
         }
 
-        while (timeLeft() > 0) {
+        while (sholdContinue()) {
           BotApp.sleep(4)
 
           solutions.synchronized {
@@ -57,14 +57,16 @@ object InteractiveSolveAndGuess {
             case Some(program) =>
               server.guess(problem.id, program) match {
                 case Win =>
-                //TODO
+                  problem = problem.copy(solved = true)
                 case Error(message) =>
                 //TODO
                 case Mismatch(in, out, _) =>
+                  problem = problem.copy(evaluationResults = problem.evaluationResults + (in -> out))
                   solver.notifyNewData(Map(in -> out))
               }
             case None =>
               val newResults = downloadNextEvalResults()
+              problem = problem.copy(evaluationResults = problem.evaluationResults ++ newResults)
               solver.notifyNewData(newResults.toMap)
           }
         }
