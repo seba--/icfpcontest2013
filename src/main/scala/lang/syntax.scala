@@ -227,7 +227,7 @@ object Concrete {
       else if (x == foldNext)
         (FoldNext(), s2)
       else if (x == foldVar)
-        (FoldVar(), s2)
+        (FoldAcc(), s2)
       else throw ParseException("Unbound variable " + x, s2)
     }
     else

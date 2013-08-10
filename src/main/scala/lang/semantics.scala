@@ -49,7 +49,7 @@ object Semantics {
       case FoldAcc() =>
         if (foldAcc.isDefined)
           foldAcc.get
-        else throw UnboundVariable(FoldVar().toString)
+        else throw UnboundVariable(FoldAcc().toString)
 
       case IfZero(cond, yes, no) => {
         val cval = eval(cond)

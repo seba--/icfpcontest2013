@@ -3,7 +3,7 @@ package solver.filter
 import solver.Filter
 import scala.collection.immutable.Map
 import solver.ProblemSpec
-import lang.FlatAbstract._
+import lang.Abstract._
 import lang.Metadata._
 
 class SizeFilter extends Filter {

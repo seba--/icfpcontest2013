@@ -1,6 +1,6 @@
 package solver
 
-import lang.FlatAbstract._
+import lang.Abstract._
 
 /**
  * If you need more elaborate metadata, add it to this problem specification class as public fields that
@@ -9,7 +9,7 @@ import lang.FlatAbstract._
 case class ProblemSpec(
     id: String, 
     size : Int, 
-    operators: List[Node], 
+    operators: List[Operator], 
     data: collection.mutable.Map[Long, Long]) {
   // maximal number an operator can be used in the solution
   // val maxOperatorUsage: Map[Node, Int]

@@ -1,6 +1,6 @@
 package solver
 
-import lang.FlatAbstract._
+import lang.Abstract._
 
 /**
  * Search solutions using a mutator, filter, and fitness function.

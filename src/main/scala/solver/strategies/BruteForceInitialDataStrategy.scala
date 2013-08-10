@@ -5,15 +5,15 @@ import solver.Filter
 import solver.Fitness
 import solver.ProblemSpec
 import solver.Mutator
-import lang.FlatAbstract._
+import lang.Abstract._
 import scala.collection.mutable.DoubleLinkedList
 
 class BruteForceInitialDataStrategy extends Strategy {
-  var current = DoubleLinkedList[Node]()
+  var current: Exp = Box()
   
   def notifyNewData(delta: Map[Long, Long]) {
     // reset: this solver requires full initial data
-    current = DoubleLinkedList[Node]()
+    current = Box()
   }
 
   // Find next solution, or return None.

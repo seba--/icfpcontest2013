@@ -1,6 +1,6 @@
 package solver.fitness
 
-import lang.FlatAbstract._
+import lang.Abstract._
 import solver.Fitness
 import solver.ProblemSpec
 

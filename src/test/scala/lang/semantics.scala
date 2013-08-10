@@ -1,7 +1,7 @@
 package lang
 
 import org.scalatest.FunSuite
-import lang.FlatAbstract._
+import lang.Abstract._
 import lang.Semantics.eval
 import datacollection.TrainingProblemStore
 import java.io.File
@@ -43,6 +43,7 @@ class SomeTests extends FunSuite {
         case (input, output) =>
           val longInput = Semantics.fromString(input)
           val longOutput = Semantics.fromString(output)
+          println("Test " + problem.id)
           val result = Semantics.eval(program)(longInput)
           assert(result === longOutput, s"Failed: ${problem.id} with input $input, expected: $output, but was: "+Semantics.toString(result))
           println(s"ok: ${problem.id} with input $input")
