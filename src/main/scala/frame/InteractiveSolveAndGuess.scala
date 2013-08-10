@@ -1,11 +1,8 @@
 package frame
 
 import solver.Solver
-import model.TrainingProblem
 import scala.collection.mutable.Queue
 import solver.ProblemSpec
-import model.EvalRequest
-import model.EvalRequest
 import lang.Semantics
 import datacollection.EvalDownload
 import scala.concurrent._
@@ -13,30 +10,32 @@ import ExecutionContext.Implicits.global
 import datacollection.BotApp
 import lang.Abstract.Exp
 import lang.Concrete
-import model.Guess
 import http.IcfpcHttpCommunication
 import json.JsonParser
-import model.GuessResponse
+import client.api.Problem
+import lang.Semantics.Value
+import client.api._
 
-object InteractiveSolveAndGuess {
-  val problems = Queue[TrainingProblem]()
-  val numbers = Seq[Semantics.Value]()
+class InteractiveSolveAndGuess (val server : ServerFacade, allProblems: Iterable[Problem]){
+  val problems = Queue[Problem]() ++ allProblems
+  val numbers = Seq[Value]()
 
   def apply(solver: Solver) {
     while (!problems.isEmpty) {
-      val problem = problems.dequeue()
+      var problem = problems.dequeue()
       val iter = numbers.iterator
-      def downloadNextEvalResults() = EvalDownload.requestEvalResultsInLong(problem.id, iter.take(256).toSeq)
-      val spec = ProblemSpec(problem)
+      def downloadNextEvalResults() = server.eval(problem.id, iter.take(256).toSeq)
 
       val timeout = System.currentTimeMillis() + 5 * 60 * 1000
       def timeLeft() = timeout - System.currentTimeMillis()
+      def sholdContinue() = !problem.solved && timeLeft() > 0
+      
       val initialResults = downloadNextEvalResults()
-      spec.data ++= initialResults
-      solver.init(spec)
+      solver.init(problem)
+      
       val solutions = Queue[Exp]()
 
-      while (timeLeft() > 0) {
+      while (sholdContinue()) {
         future {
           while (solver.nextSolution() match {
             case Some(e) =>
@@ -49,33 +48,29 @@ object InteractiveSolveAndGuess {
           }) {}
         }
 
-        while (timeLeft() > 0) {
+        while (sholdContinue()) {
           BotApp.sleep(4)
 
           solutions.synchronized {
-            if (solutions.isEmpty) None else solutions.dequeue()
+            if (solutions.isEmpty) None else Some(solutions.dequeue())
           } match {
             case Some(program) =>
-              val guess = Guess(problem.id, program.toString)
-              val response = IcfpcHttpCommunication.post("guess", JsonParser.serialize(guess))
-              val result = JsonParser.deserialize(response, classOf[GuessResponse])
-              result.status match {
-                case "win" =>
+              server.guess(problem.id, program) match {
+                case Win =>
+                  problem = problem.copy(solved = true)
+                case Error(message) =>
                 //TODO
-                case "error" =>
-                //TODO
-                case "mismatch" =>
-                  val in = Semantics.fromString(result.values(0))
-                  val out = Semantics.fromString(result.values(1))
-                  spec.data += (in -> out)
+                case Mismatch(in, out, _) =>
+                  problem = problem.copy(evaluationResults = problem.evaluationResults + (in -> out))
                   solver.notifyNewData(Map(in -> out))
               }
             case None =>
               val newResults = downloadNextEvalResults()
-              spec.data ++= newResults
+              problem = problem.copy(evaluationResults = problem.evaluationResults ++ newResults)
               solver.notifyNewData(newResults.toMap)
           }
         }
+        // TODO store problem
       }
     }
   }

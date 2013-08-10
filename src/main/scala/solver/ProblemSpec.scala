@@ -1,8 +1,8 @@
 package solver
 
 import lang.Abstract._
-import model.TrainingProblem
 import lang.Concrete
+import client.api.Problem
 
 /**
  * If you need more elaborate metadata, add it to this problem specification class as public fields that
@@ -18,6 +18,5 @@ case class ProblemSpec(
 }
 
 object ProblemSpec {
-  def apply(problem: TrainingProblem) = new ProblemSpec(problem.id, problem.size, mapOperators(problem.operators), problem.evaluationResultsAsLong)
-  private def mapOperators(ops: List[String]) : List[Operator] = ops.map(Concrete.tryParseOperator(_).get)
+  def apply(problem: Problem) = new ProblemSpec(problem.id, problem.size, problem.operators, problem.evaluationResults)
 }

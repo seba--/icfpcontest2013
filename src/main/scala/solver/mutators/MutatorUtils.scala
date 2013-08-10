@@ -17,6 +17,7 @@ object MutatorUtils {
       case Xor => BApp(Xor, Zero(), Zero())
       case If0 => IfZero(Zero(), Zero(), Zero())
       case Operator.Fold => lang.Abstract.Fold(Zero(), Zero(), Zero())
+      case Operator.TFold => lang.Abstract.Fold(Zero(), Zero(), Zero())
     }
   }
   
@@ -29,7 +30,9 @@ object MutatorUtils {
     case FoldNext() => Some(getMinimalExpressionForOperator(ops.head))
     case _ => {
       val op = getOperator(e).get
-      val pos = ops.indexOf(op)
+      var pos = ops.indexOf(op)
+      if (pos < 0 && op == Operator.Fold)
+        pos = ops.indexOf(Operator.TFold)
       if (pos < 0)
         throw new IllegalArgumentException("Input expression uses invalid operator")
       if (pos + 1 >= ops.size)

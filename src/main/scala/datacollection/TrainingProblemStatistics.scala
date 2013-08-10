@@ -1,15 +1,15 @@
 package datacollection
 
 import java.io.File
-import model.TrainingProblem
 import json.JsonParser
+import server.api.ProblemResponse
 
 object TrainingProblemStatistics extends App {
   type SumMap = Map[Int, Map[Int, Set[String]]]
 
   case class Sum(all: SumMap, withFold: SumMap, withoutFold: SumMap)
 
-  def count(map: SumMap, problem: TrainingProblem) = {
+  def count(map: SumMap, problem: ProblemResponse) = {
     val opCount = problem.operators.size
     val bySize = map(problem.size)
     val bySizeAndOpCount = bySize(opCount)
@@ -37,7 +37,7 @@ object TrainingProblemStatistics extends App {
     }
     p.close()
   }
-  def sum(problems: Iterable[TrainingProblem]) = {
+  def sum(problems: Iterable[ProblemResponse]) = {
     val innerWithDefault = Map[Int, Set[String]]().withDefaultValue(Set[String]())
     val outerWithDefault = Map[Int, Map[Int, Set[String]]]().withDefaultValue(innerWithDefault)
 
