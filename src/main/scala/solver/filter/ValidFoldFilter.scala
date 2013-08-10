@@ -9,7 +9,7 @@ import lang.Abstract._
 /**
  * Ensures that the expression contains at most 1 fold operator.
  */
-class DoubleFoldFilter extends Filter {
+class ValidFoldFilter extends Filter {
 
   def init(spec: ProblemSpec) {
     // ignore

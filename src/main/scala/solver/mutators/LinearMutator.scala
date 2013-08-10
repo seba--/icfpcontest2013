@@ -16,18 +16,23 @@ object LinearMutator extends Mutator {
   def notifyNewData(data: Map[Long, Long]): Unit = {}
 
   var lastModified: Option[Exp] = None
+  var newLastModified: Option[Exp] = None
 
   def stepOver(e: Exp): Option[Exp] = {
     if (lastModified.isEmpty)
       throw new IllegalStateException("lastModified is empty")
-    stepOver_(e) match {
+    newLastModified = None
+    val result = stepOver_(e)
+    lastModified = newLastModified
+    result match {
       case Left(e) => Some(e)
       case Right(true) => {
         val newExp = MutatorUtils.getNextMinimalExpression(e, specs.operators)
         if (newExp.isEmpty)
           None
         else {
-          Some(e)
+          lastModified = newExp
+          newExp
         }
       }
       case Right(false) => throw new IllegalStateException("expression does not contain the last modified expression")
@@ -37,51 +42,24 @@ object LinearMutator extends Mutator {
   def stepOver_(e: Exp): Either[Exp, Boolean] = {
     if (e == lastModified.get)
       Right(true)
-    e match {
-      case b @ Box() => if (b.isEmpty) Right(false) else stepOver_(b.e)
-      case Zero() => Right(false)
-      case One() => Right(false)
-      case MainVar() => Right(false)
-      case FoldNext() => Right(false)
-      case FoldAcc() => Right(false)
-      case ifExp @ IfZero(_, _, _) => {
-        stepOver_(ifExp.cond) match {
-          case Left(e) =>
-            ifExp.cond = e
-            Left(ifExp)
-          case Right(true) => {
-            val newExp = MutatorUtils.getNextMinimalExpression(ifExp.cond, specs.operators)
-            if (newExp.isEmpty)
-              stepInto(ifExp.yes) match {
-                case None => stepInto(ifExp.no) match {
-                  case None => Right(true)
-                  case Some(e) => {
-                    ifExp.no = e
-                    ifExp.yes = Zero()
-                    ifExp.cond = Zero()
-                    Left(ifExp)
-                  }
-                }
-                case Some(e) => {
-                  ifExp.yes = e
-                  ifExp.cond = Zero()
-                  Left(ifExp)
-                }
-              }
-            else {
-              ifExp.cond = newExp.get
+    else {
+      val modification = e match {
+        case b @ Box() => if (b.isEmpty) Right(false) else stepOver_(b.e)
+        case Zero() => Right(false)
+        case One() => Right(false)
+        case MainVar() => Right(false)
+        case FoldNext() => Right(false)
+        case FoldAcc() => Right(false)
+        case ifExp @ IfZero(_, _, _) => {
+          stepOver_(ifExp.cond) match {
+            case Left(e) =>
+              ifExp.cond = e
               Left(ifExp)
-            }
-          }
-          case Right(false) =>
-            stepOver_(ifExp.yes) match {
-              case Left(e) =>
-                ifExp.yes = e
-                Left(ifExp)
-              case Right(true) => {
-                val newExp = MutatorUtils.getNextMinimalExpression(ifExp.yes, specs.operators)
-                if (newExp.isEmpty)
-                  stepInto(ifExp.no) match {
+            case Right(true) => {
+              val newExp = MutatorUtils.getNextMinimalExpression(ifExp.cond, specs.operators)
+              if (newExp.isEmpty)
+                stepInto(ifExp.yes) match {
+                  case None => stepInto(ifExp.no) match {
                     case None => Right(true)
                     case Some(e) => {
                       ifExp.no = e
@@ -90,69 +68,69 @@ object LinearMutator extends Mutator {
                       Left(ifExp)
                     }
                   }
-                else {
-                  ifExp.yes = newExp.get
-                  Left(ifExp)
-                }
-              }
-              case Right(false) =>
-                stepOver_(ifExp.no) match {
-                  case Left(e) =>
-                    ifExp.no = e
-                    Left(ifExp)
-                  case Right(true) => {
-                    val newExp = MutatorUtils.getNextMinimalExpression(ifExp.no, specs.operators)
-                    if (newExp.isEmpty)
-                      Right(true)
-                    else {
-                      ifExp.no = newExp.get
-                      Left(ifExp)
-                    }
-                  }
-                  case Right(false) => Right(false)
-                }
-            }
-
-        }
-      }
-      case fold @ Fold(_, _, _) => {
-        stepOver_(fold.over) match {
-          case Left(e) =>
-            fold.over = e
-            Left(fold)
-          case Right(true) => {
-            val newExp = MutatorUtils.getNextMinimalExpression(fold.over, specs.operators)
-            if (newExp.isEmpty)
-              stepInto(fold.init) match {
-                case None => stepInto(fold.body) match {
-                  case None => Right(true)
                   case Some(e) => {
-                    fold.body = e
-                    fold.init = Zero()
-                    fold.over = Zero()
-                    Left(fold)
+                    ifExp.yes = e
+                    ifExp.cond = Zero()
+                    Left(ifExp)
                   }
                 }
-                case Some(e) => {
-                  fold.init = e
-                  fold.over = Zero()
-                  Left(fold)
-                }
+              else {
+                ifExp.cond = newExp.get
+                Left(ifExp)
               }
-            else {
-              fold.over = newExp.get
-              Left(fold)
             }
+            case Right(false) =>
+              stepOver_(ifExp.yes) match {
+                case Left(e) =>
+                  ifExp.yes = e
+                  Left(ifExp)
+                case Right(true) => {
+                  val newExp = MutatorUtils.getNextMinimalExpression(ifExp.yes, specs.operators)
+                  if (newExp.isEmpty)
+                    stepInto(ifExp.no) match {
+                      case None => Right(true)
+                      case Some(e) => {
+                        ifExp.no = e
+                        ifExp.yes = Zero()
+                        ifExp.cond = Zero()
+                        Left(ifExp)
+                      }
+                    }
+                  else {
+                    ifExp.yes = newExp.get
+                    Left(ifExp)
+                  }
+                }
+                case Right(false) =>
+                  stepOver_(ifExp.no) match {
+                    case Left(e) =>
+                      ifExp.no = e
+                      Left(ifExp)
+                    case Right(true) => {
+                      val newExp = MutatorUtils.getNextMinimalExpression(ifExp.no, specs.operators)
+                      if (newExp.isEmpty)
+                        Right(true)
+                      else {
+                        ifExp.no = newExp.get
+                        Left(ifExp)
+                      }
+                    }
+                    case Right(false) => Right(false)
+                  }
+              }
+
           }
-          case Right(false) =>
-            stepOver_(fold.init) match {
-              case Left(e) =>
-                fold.init = e
-                Left(fold)
-              case Right(true) => {
-                val newExp = MutatorUtils.getNextMinimalExpression(fold.init, specs.operators)
-                if (newExp.isEmpty)
-                  stepInto(fold.body) match {
+        }
+        case fold @ Fold(_, _, _) => {
+          stepOver_(fold.over) match {
+            case Left(e) =>
+              fold.over = e
+              Left(fold)
+            case Right(true) => {
+              val newExp = MutatorUtils.getNextMinimalExpression(fold.over, specs.operators)
+              if (newExp.isEmpty)
+                stepInto(fold.init) match {
+                  case None => stepInto(fold.body) match {
                     case None => Right(true)
                     case Some(e) => {
                       fold.body = e
@@ -161,93 +139,130 @@ object LinearMutator extends Mutator {
                       Left(fold)
                     }
                   }
-                else {
-                  fold.init = newExp.get
-                  Left(fold)
-                }
-              }
-              case Right(false) =>
-                stepOver_(fold.body) match {
-                  case Left(e) =>
-                    fold.body = e
+                  case Some(e) => {
+                    fold.init = e
+                    fold.over = Zero()
                     Left(fold)
-                  case Right(true) => {
-                    val newExp = MutatorUtils.getNextMinimalExpression(fold.body, specs.operators)
-                    if (newExp.isEmpty)
-                      Right(true)
-                    else {
-                      fold.body = newExp.get
-                      Left(fold)
-                    }
                   }
-                  case Right(false) => Right(false)
                 }
+              else {
+                fold.over = newExp.get
+                Left(fold)
+              }
             }
+            case Right(false) =>
+              stepOver_(fold.init) match {
+                case Left(e) =>
+                  fold.init = e
+                  Left(fold)
+                case Right(true) => {
+                  val newExp = MutatorUtils.getNextMinimalExpression(fold.init, specs.operators)
+                  if (newExp.isEmpty)
+                    stepInto(fold.body) match {
+                      case None => Right(true)
+                      case Some(e) => {
+                        fold.body = e
+                        fold.init = Zero()
+                        fold.over = Zero()
+                        Left(fold)
+                      }
+                    }
+                  else {
+                    fold.init = newExp.get
+                    Left(fold)
+                  }
+                }
+                case Right(false) =>
+                  stepOver_(fold.body) match {
+                    case Left(e) =>
+                      fold.body = e
+                      Left(fold)
+                    case Right(true) => {
+                      val newExp = MutatorUtils.getNextMinimalExpression(fold.body, specs.operators)
+                      if (newExp.isEmpty)
+                        Right(true)
+                      else {
+                        fold.body = newExp.get
+                        Left(fold)
+                      }
+                    }
+                    case Right(false) => Right(false)
+                  }
+              }
 
+          }
         }
-      }
-      case uExp @ UApp(_, _) => {
-        stepOver_(uExp.e) match {
-          case Left(e) =>
-            uExp.e = e
-            Left(uExp)
-          case Right(true) => {
-            val newExp = MutatorUtils.getNextMinimalExpression(uExp.e, specs.operators)
-            if (newExp.isEmpty)
-              Right(true)
-            else {
-              uExp.e = newExp.get
+        case uExp @ UApp(_, _) => {
+          stepOver_(uExp.e) match {
+            case Left(e) =>
+              uExp.e = e
               Left(uExp)
-            }
-          }
-          case Right(false) => Right(false)
-        }
-      }
-      case bExp @ BApp(_, _, _) => {
-        stepOver_(bExp.e1) match {
-          case Left(e) =>
-            bExp.e1 = e
-            Left(bExp)
-          case Right(true) => {
-            val newExp = MutatorUtils.getNextMinimalExpression(bExp.e1, specs.operators)
-            if (newExp.isEmpty)
-              stepInto(bExp.e2) match {
-                case None => Right(true)
-                case Some(e) => {
-                  bExp.e2 = e
-                  bExp.e1 = Zero()
-                  Left(bExp)
-                }
+            case Right(true) => {
+              val newExp = MutatorUtils.getNextMinimalExpression(uExp.e, specs.operators)
+              if (newExp.isEmpty)
+                Right(true)
+              else {
+                uExp.e = newExp.get
+                Left(uExp)
               }
-            else {
-              bExp.e1 = newExp.get
+            }
+            case Right(false) => Right(false)
+          }
+        }
+        case bExp @ BApp(_, _, _) => {
+          stepOver_(bExp.e1) match {
+            case Left(e) =>
+              bExp.e1 = e
               Left(bExp)
-            }
-          }
-          case Right(false) =>
-            stepOver_(bExp.e2) match {
-              case Left(e) =>
-                bExp.e2 = e
-                Left(bExp)
-              case Right(true) => {
-                val newExp = MutatorUtils.getNextMinimalExpression(bExp.e2, specs.operators)
-                if (newExp.isEmpty)
-                  Right(true)
-                else {
-                  bExp.e2 = newExp.get
-                  Left(bExp)
+            case Right(true) => {
+              val newExp = MutatorUtils.getNextMinimalExpression(bExp.e1, specs.operators)
+              if (newExp.isEmpty)
+                stepInto(bExp.e2) match {
+                  case None => Right(true)
+                  case Some(e) => {
+                    bExp.e2 = e
+                    bExp.e1 = Zero()
+                    Left(bExp)
+                  }
                 }
+              else {
+                bExp.e1 = newExp.get
+                Left(bExp)
               }
-              case Right(false) => Right(false)
             }
+            case Right(false) =>
+              stepOver_(bExp.e2) match {
+                case Left(e) =>
+                  bExp.e2 = e
+                  Left(bExp)
+                case Right(true) => {
+                  val newExp = MutatorUtils.getNextMinimalExpression(bExp.e2, specs.operators)
+                  if (newExp.isEmpty)
+                    Right(true)
+                  else {
+                    bExp.e2 = newExp.get
+                    Left(bExp)
+                  }
+                }
+                case Right(false) => Right(false)
+              }
+          }
         }
       }
+      if (newLastModified.isEmpty)
+        modification match {
+          case Left(e) => newLastModified = Some(e)
+          case Right(_) => {}
+        }
+      modification
     }
   }
 
   def stepInto(e: Exp): Option[Exp] = {
-    lastModified = None
-    stepInto_(e)
+    newLastModified = None
+    val result = stepInto_(e)
+    lastModified = newLastModified
+    result
   }
 
   def stepInto_(e: Exp): Option[Exp] = {
@@ -328,22 +343,8 @@ object LinearMutator extends Mutator {
         }
       }
     }
-    if (lastModified.isEmpty && modification.isDefined)
-      lastModified = modification
+    if (newLastModified.isEmpty && modification.isDefined)
+      newLastModified = modification
     modification
-  }
-
-  def numOfArgs(n: Exp): Int = {
-    n match {
-      case Zero() => 0
-      case One() => 0
-      case MainVar() => 0
-      case FoldNext() => 0
-      case FoldAcc() => 0
-      case IfZero(_, _, _) => 3
-      case UApp(_, _) => 1
-      case BApp(_, _, _) => 2
-      case Fold(_, _, _) => 3
-    }
   }
 }
