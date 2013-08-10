@@ -6,8 +6,8 @@ import lang.FlatAbstract._
 import lang.Semantics._
 
 /**
- * Ensures that the expression is a valid language expression.
- * Ensures that eval(expression)(input) == output for all known input-output pairs.
+ * - Ensures that the expression is a valid (partial) language expression.
+ * - Ensures that eval(expression)(input) == output for all known input-output pairs.
  */
 class EvalFilter extends Filter {
   var spec: ProblemSpec = null
