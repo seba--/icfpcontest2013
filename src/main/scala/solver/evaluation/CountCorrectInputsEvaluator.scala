@@ -46,14 +46,21 @@ class CountCorrectInputsEvaluator(problems: Iterable[TrainingProblem]) extends S
     log("init took %dms".format(Benchmarked(solver.init(ProblemSpec(problem))).duration))
     var continue = true;
     do {
-      val benchmarked = Benchmarked(solver.nextSolution())
-      continue = benchmarked.value.isDefined
-      if (continue) {
-        val evaled = new EvaluatedSolution(benchmarked.map { _.get }, problem)
-        val EvaluationResultCounter(correct, wrong, crashed) = evaled.counts
-        log("solution took %dms, results: %d correct, %d wrong, %d crashed".format(benchmarked.duration, correct, wrong, crashed))
-      } else {
-        log("no more solutions, took %dms".format(benchmarked.duration))
+      continue = try {
+        val benchmarked = Benchmarked(solver.nextSolution())
+        if (benchmarked.value.isDefined) {
+          val evaled = new EvaluatedSolution(benchmarked.map { _.get }, problem)
+          val EvaluationResultCounter(correct, wrong, crashed) = evaled.counts
+          log("next solution took %dms, results: %d correct, %d wrong, %d crashed".format(benchmarked.duration, correct, wrong, crashed))
+          true
+        } else {
+          log("no more solutions, took %dms".format(benchmarked.duration))
+          false
+        }
+      } catch {
+        case e: Exception =>
+          log("next solution crashed: %s(%s)".format(e.getClass.getSimpleName, e.getMessage()))
+          false
       }
     } while (continue)
   }
