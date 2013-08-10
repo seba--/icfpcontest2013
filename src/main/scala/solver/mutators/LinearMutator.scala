@@ -23,7 +23,7 @@ object LinearMutator extends Mutator {
       case MainVar() => Some(FoldAcc())
       case FoldAcc() => Some(FoldNext())
       case FoldNext() => Some(MutatorUtils.getMinimalExpressionForOperator(specs.operators(0)))
-      case ifExp@IfZero(_, _, _) =>
+      case ifExp@IfZero(_, _, _) => {
         val newCond = stepInto(ifExp.cond)
         if (newCond.isDefined) {
           ifExp.cond = newCond.get
@@ -45,61 +45,62 @@ object LinearMutator extends Mutator {
               Some(ifExp)
             }
             else
-              None
+              MutatorUtils.getNextMinimalExpression(ifExp, specs.operators)
           }
         }
-      case uExp@UApp(_, _) => {
-        
       }
-    }
-    
-//    if (e == null || size(e) == 1)
-//      Some(Zero())
-//    else
-//      mutateAtPosition(e, 0)
-  }
-  
-  def mutateAtPosition(e : Exp, pos: Int) : Option[Exp] = {
-    if (pos < 0)
-      return None
-    val mutatedOp : Option[Node] = mutateNode(e(pos))
-    mutatedOp match {
-      case None => mutateAtPosition(e, pos - 1)
-      case Some(n) =>
-        val args = numOfArgs(n)
-        // generate the new operator and the needed arguments
-        val newArgs = DoubleLinkedList[Node]() ++ ((0 to args) map (_ => Zero ))
-        // replace the old operator by the new one
-        var el = e
-        for (_ <- 0 to pos)
-          el = e.next
-        var numOfOldArgs = numOfArgs(el.elem)
-        var lastOldArg = el
-        while (numOfOldArgs > 0) {
-          lastOldArg = lastOldArg.next
-          numOfOldArgs -= 1
-          numOfOldArgs += numOfArgs(lastOldArg.elem)
+      case uExp@UApp(_, _) => {
+        val newSub = stepInto(uExp.e)
+        if (newSub.isDefined) {
+          uExp.e = newSub.get
+          Some(uExp)
         }
-        el.elem = n
-        el.next = newArgs
-        newArgs.prev = el
-        val restList = lastOldArg.next
-        
-        Some(e)
-    }
-  }
-  
-  def mutateNode(n: Exp) : Option[Exp] = {
-    n match {
-      case Zero => Some(One)
-      case One => Some(MainVar)
-      case MainVar => Some(specs.operators(0))
-      case others =>
-        val index = specs.operators.indexOf(n) + 1
-        if (index == specs.operators.size) 
-          None
-        else
-          Some(specs.operators(index))
+        else 
+          MutatorUtils.getNextMinimalExpression(uExp, specs.operators)
+      }
+      case bExp@BApp(_, _, _) => {
+        val newLeft = stepInto(bExp.e1)
+        if (newLeft.isDefined) {
+          bExp.e1 = newLeft.get
+          Some(bExp)
+        }
+        else {
+          val newRight = stepInto(bExp.e2)
+          if (newRight.isDefined) {
+            bExp.e1 = Zero()
+            bExp.e2 = newRight.get
+            Some(bExp)
+          }
+          else
+            MutatorUtils.getNextMinimalExpression(bExp, specs.operators)
+        }
+      }
+      case fold@Fold(_, _, _) => {
+        val newOver = stepInto(fold.over)
+        if (newOver.isDefined) {
+          fold.over = newOver.get
+          Some(fold)
+        }
+        else {
+          val newInit = stepInto(fold.init)
+          if (newInit.isDefined) {
+            fold.over = Zero()
+            fold.init = newInit.get
+            Some(fold)
+          }
+          else {
+            val newBody = stepInto(fold.body)
+            if (newBody.isDefined) {
+              fold.over = Zero()
+              fold.init = Zero()
+              fold.body = newBody.get
+              Some(fold)
+            }
+            else
+              MutatorUtils.getNextMinimalExpression(fold, specs.operators)
+          }
+        }
+      }
     }
   }
   
