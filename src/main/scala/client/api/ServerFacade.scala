@@ -12,10 +12,11 @@ import com.fasterxml.jackson.core.JsonFactory
 import java.io.File
 import datacollection.TrainingProblemStore
 import lang.Concrete
+import server.api.ProblemResponse
 
 case class Problem(id: String, size: Int, operators: List[Operator], solved: Boolean, timeLeft: Int, evaluationResults: Map[Long, Long], challenge: Exp)
 object Problem {
-  def apply(problem: server.api.Problem): Problem = {
+  def apply(problem: ProblemResponse): Problem = {
     val evaluationResultsAsLong = problem.evaluationResults.map {
       case (in, out) => Semantics.fromString(in) -> Semantics.fromString(out)
     }
@@ -49,14 +50,14 @@ class ServerFacade(theServer: Server) {
   val trainingStore = new TrainingProblemStore(new File("problems/train3"))
   def myProblems(): Seq[Problem] = {
     val parser = new JsonFactory().createJsonParser(new File("problems", "myproblems.txt"));
-    val myProblems = JsonParser.mapper.readValues(parser, classOf[server.api.Problem])
+    val myProblems = JsonParser.mapper.readValues(parser, classOf[ProblemResponse])
     var result = List[Problem]()
     while (myProblems.hasNext()) {
       result ::= client.api.Problem(myProblems.next())
     }
     result
   }
-  val trainingProblems: Seq[Problem] = trainingStore.allProblems.map { client.api.Problem(_) }
+  val trainingProblems: Seq[Problem] = trainingStore.allProblems.map { Problem(_) }
   def guess(id: String, program: Exp): GuessResponse = {
     GuessResponse(theServer.guess(new GuessRequest(id, program.toString)))
   }

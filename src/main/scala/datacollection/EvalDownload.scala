@@ -8,12 +8,12 @@ import scala.collection.mutable.Queue
 import java.io.File
 import com.sun.xml.internal.bind.v2.TODO
 import BotApp._
-import server.api.Problem
+import server.api.ProblemResponse
 import server.api.IcfpcServer
 import server.api.EvalRequest
 
 object EvalDownload extends App {
-  def requestEvalResults(problem: Problem, inputs: Seq[String]): Seq[(String, String)] = requestEvalResults(problem.id, inputs)
+  def requestEvalResults(problem: ProblemResponse, inputs: Seq[String]): Seq[(String, String)] = requestEvalResults(problem.id, inputs)
 
   def requestEvalResultsInLong(id: String, arguments: Seq[Long]): Seq[(Long, Long)] = {
     requestEvalResults(id, Semantics.toStringList(arguments)).map {
@@ -27,7 +27,7 @@ object EvalDownload extends App {
 
   def doDownloads(inputStore: TrainingProblemStore, targetStore: TrainingProblemStore, requests: Iterable[Long]) {
     val translatedRequests = requests.toList.map { Semantics.toString(_) }
-    val toDownload = Queue[Problem]()
+    val toDownload = Queue[ProblemResponse]()
     inputStore.ids().foreach {
       (id =>
         if (!targetStore.contains(id)) toDownload += inputStore.read(id))
