@@ -1,12 +1,12 @@
 package solver
 package evaluation
 
-import model.TrainingProblem
+import client.api.Problem
 import lang.Semantics
 import datacollection.BotApp._
 import lang.Abstract.Exp
 
-class EvaluatedSolution(nextSolutionBenchmark: Benchmarked[Exp], problem: TrainingProblem) {
+class EvaluatedSolution(nextSolutionBenchmark: Benchmarked[Exp], problem: Problem) {
   val Benchmarked(program, duration) = nextSolutionBenchmark
   val counts = EvaluationResultCounter(program, problem)
   val EvaluationResultCounter(correct, wrong, crashed) = counts
@@ -19,8 +19,8 @@ case class EvaluationResultCounter(correct: Int, wrong: Int, crashed: Int) {
 }
 
 object EvaluationResultCounter {
-  def apply(program: Exp, problem: TrainingProblem): EvaluationResultCounter = {
-    problem.evaluationResultsAsLong.foldLeft(EvaluationResultCounter(0, 0, 0)) {
+  def apply(program: Exp, problem: Problem): EvaluationResultCounter = {
+    problem.evaluationResults.foldLeft(EvaluationResultCounter(0, 0, 0)) {
       case (counter, (in, out)) =>
         try {
           if (Semantics.eval(program)(in) == out) {
@@ -36,14 +36,14 @@ object EvaluationResultCounter {
   }
 }
 
-class CountCorrectInputsEvaluator(problems: Iterable[TrainingProblem]) extends SolverEvaluator {
+class CountCorrectInputsEvaluator(problems: Iterable[Problem]) extends SolverEvaluator {
   override def evaluate(solver: Solver) {
     problems.map(problem => problem -> evaluate(problem, solver))
   }
 
-  def evaluate(problem: TrainingProblem, solver: Solver) {
+  def evaluate(problem: Problem, solver: Solver) {
     log("starting init for problem: %s, program size: %d, operators: %s".format(problem.id, problem.size, problem.operators))
-    log("init took %dms".format(Benchmarked(solver.init(ProblemSpec(problem))).duration))
+    log("init took %dms".format(Benchmarked(solver.init(problem)).duration))
     var continue = true;
     do {
       continue = try {

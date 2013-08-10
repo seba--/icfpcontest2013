@@ -8,8 +8,8 @@ import javax.swing.WindowConstants
 
 object Test extends App {
     val store = new TrainingProblemStore(new File("problems/train3"))
-    val evaluator = new CountCorrectInputsEvaluator(((store.ids()).take(10).map(store.read(_))))
-    evaluator.evaluate(new BruteForceSizeFilteredSolver)
+//    val evaluator = new CountCorrectInputsEvaluator((store.allProblems().filter(_.size < 5).take(10)))
+//    evaluator.evaluate(new BruteForceSizeFilteredSolver)
 //
 //  val dataSet = new DefaultXYDataset()
 //  dataSet.addSeries("bruteForce", Array[Array[Double]](
