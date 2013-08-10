@@ -1,70 +1,46 @@
 package lang;
 
-import lang.FlatAbstract._
-import lang.FlatAbstract.Node._
+import lang.Abstract._
 
 object Metadata {
   
-  def size(e: Exp): Int = 1 + size_(e)._1
+  def size(e: Exp): Int = 1 + size_(e)
   
-  def size_(e: Exp): (Int, Exp) = 
-    if (e.head == Zero || e.head == One || e.head == MainVar || e.head == FoldNext || e.head == FoldAcc)
-      (1, e.next)
-    else if (e.head == IfZero) {
-      val (cond, rest1) = size_(e.next)
-      val (yes, rest2)  = size_(rest1)
-      val (no, rest3)   = size_(rest2)
-      (1+cond+yes+no, rest3)
-    }
-    else if (e.head == Fold) {
-      val (over, rest1) = size_(e.next)
-      val (init, rest2)  = size_(rest1)
-      val (body, rest3)   = size_(rest2)
-      (2+over+init+body, rest3)
-    }
-    else if (tryGetUnaryOp(e.head).isDefined) {
-      val (v, rest) = size_(e.next)
-      (1+v, rest)
-    }
-    else if (tryGetBinaryOp(e.head).isDefined) {
-      val (v1, rest1) = size_(e.next)
-      val (v2, rest2) = size_(rest1)
-      (1+v1+v2, rest2)
-    }
-    else
-      throw new IllegalArgumentException("unknown operator")
+  def size_(e: Exp): Int = e match {
+    case Zero() => 1 
+    case One() => 1
+    case MainVar() => 1
+    case FoldNext() => 1
+    case FoldAcc() => 1
+    case IfZero(cond, yes, no) => 1 + size_(cond) + size_(yes) + size_(no)
+    case Fold(over, init, body) => 2 + size(over) + size_(init) + size_(body)
+    case UApp(op, e) => 1 + size_(e)
+    case BApp(op, e1, e2) => 1 + size_(e1) + size_(e2)
+  }
 
-
-  def topOps(e: Exp): Set[Node] = {
-    val os = ops(e)._1
+  def topOps(e: Exp): Set[Operator] = {
+    val os = ops(e)
     if (hasTopFold(e))
-      os + TFold
+      os + Operator.TFold
     else
       os
   }
   
-  def ops(e: Exp): (Set[Node], Exp) = 
-    if (e.head == Zero || e.head == One || e.head == MainVar || e.head == FoldNext || e.head == FoldAcc)
-      (Set[Node](), e.next)
-    else if (e.head == IfZero || e.head == Fold) {
-      val (o1, rest1):(Set[Node], Exp) = ops(e.next)
-      val (o2, rest2):(Set[Node], Exp) = ops(rest1)
-      val (o3, rest3):(Set[Node], Exp) = ops(rest2)
-      (Set(e.head) ++ o1 ++ o2 ++ o3, rest3)
-    }
-    else if (tryGetUnaryOp(e.head).isDefined) {
-      val (v, rest):(Set[Node], Exp) = ops(e.next)
-      (Set(e.head) ++ v, rest)
-    }
-    else if (tryGetBinaryOp(e.head).isDefined) {
-      val (v1, rest1):(Set[Node], Exp) = ops(e.next)
-      val (v2, rest2):(Set[Node], Exp) = ops(rest1)
-      (Set(e.head) ++ v1 ++ v2, rest2)
-    }
-    else
-      throw new IllegalArgumentException("unknown operator")
+  def ops(e: Exp): Set[Operator] = e match {
+    case Zero() => Set[Operator]() 
+    case One() => Set()
+    case MainVar() => Set()
+    case FoldNext() => Set()
+    case FoldAcc() => Set()
+    case IfZero(cond, yes, no) => Set(Operator.If0) ++ ops(cond) ++ ops(yes) ++ ops(no)
+    case Fold(over, init, body) => Set(Operator.Fold) ++ ops(over) ++ ops(init) ++ ops(body)
+    case UApp(op, e) => Set(op) ++ ops(e)
+    case BApp(op, e1, e2) => Set(op) ++ ops(e1) ++ ops(e2)
+  }
 
   
-  def hasTopFold(e: Exp) = 
-    e.size >= 4 && e.head == Fold && e.next.head == MainVar && e.next.next.head == Zero
+  def hasTopFold(e: Exp) = e match {
+    case Fold(MainVar(), Zero(), _) => true
+    case _ => false
+  } 
 }

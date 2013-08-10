@@ -20,7 +20,7 @@ object Abstract {
   case class One() extends Exp { override def toString = "1" }
   case class MainVar() extends Exp { override def toString = "main_var" }
   case class FoldNext() extends Exp { override def toString = "fold_next" }
-  case class FoldVar() extends Exp { override def toString = "fold_var" }
+  case class FoldAcc() extends Exp { override def toString = "fold_var" }
   case class IfZero(var cond: Exp, var yes: Exp, var no: Exp) extends Exp { override def toString = "(if0 " + cond + " " + yes + " " + no + ")" }
   case class Fold(var over: Exp, var init: Exp, var body: Exp) extends Exp { override def toString = "(fold " + over+ " " + init + " " + "(lambda (" + "fold_next" + " " + "fold_acc" + ") " + body + ")" + ")" }
   case class UApp(var op: Operator, var e: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e + ")" }

@@ -1,12 +1,12 @@
 package lang
 
-import lang.FlatAbstract._
-import lang.FlatAbstract.Node._
+import lang.Abstract._
 import lang.Concrete._
 
 object Semantics {
 
-  case class UnexpectedOperator(expected: String, op: Node) extends Exception
+  case class UnboundVariable(x: Id) extends Exception
+  case class UnexpectedOperator(expected: String, op: Operator) extends Exception
   case class EmptyBox() extends Exception
 
   type Value = Long
@@ -27,44 +27,40 @@ object Semantics {
     }
   }
 
-  def eval(p: Exp)(v: Value): Value = {
-    val (result, rest) = new Eval(v).eval(p)
-    if (!rest.isEmpty)
-      throw UnexpectedOperator("end of input", rest.head)
-    result
-  }
+  def try_eval(p: Exp)(v: Value): Option[Value] =
+    try { Some(eval(p)(v)) } catch { case EmptyBox() => None }
+
+  def eval(e: Exp)(v: Value): Value =
+    new Eval(v).eval(e)
 
   class Eval(in: Value) {
     private var foldNext: Option[Value] = None
     private var foldAcc: Option[Value] = None
 
-    def eval(e: Exp): (Value, Exp) = 
-      if (e.head == Zero)
-        (0L, e.next)
-      else if (e.head == One) 
-        (1L, e.next)
-      else if (e.head == MainVar) 
-        (in, e.next)
-      else if (e.head == FoldNext && foldNext.isDefined)
-        (foldNext.get, e.next)
-      else if (e.head == FoldAcc && foldAcc.isDefined)
-        (foldAcc.get, e.next)
-      else if (e.head == FoldNext || e == FoldAcc)
-        throw UnexpectedOperator("Variable not bound.", e.head)
-      else if (e.head == IfZero) {
-        val (cval, rest1) = eval(e.next)
-        if (cval == 0) {
-          val (yesval, rest2) = eval(rest1)
-          (yesval, makeStructural(rest2)._2)
-        }
+    def eval(e: Exp): Value = e match {
+      case b @ Box() => if (b.isEmpty) throw new EmptyBox() else eval(b.e)
+      case Zero() => 0L
+      case One() => 1L
+      case MainVar() => in
+      case FoldNext() =>
+        if (foldNext.isDefined)
+          foldNext.get
+        else throw UnboundVariable(FoldNext().toString)
+      case FoldAcc() =>
+        if (foldAcc.isDefined)
+          foldAcc.get
+        else throw UnboundVariable(FoldVar().toString)
+
+      case IfZero(cond, yes, no) => {
+        val cval = eval(cond)
+        if (cval == 0)
+          eval(yes)
         else
-          eval(makeStructural(rest1)._2)
+          eval(no)
       }
 
-      else if (e.head == Fold) {
-        val (v, rest1) = eval(e.next)
-        val (initAcc, body) = eval(rest1)
-
+      case Fold(over, init, body) => {
+        val v = eval(over)
         val b0 = (v & 0x00000000000000FFL)
         val b1 = (v & 0x000000000000FF00L) >>> 8
         val b2 = (v & 0x0000000000FF0000L) >>> 16
@@ -74,22 +70,22 @@ object Semantics {
         val b6 = (v & 0x00FF000000000000L) >>> 48
         val b7 = (v & 0xFF00000000000000L) >>> 56
 
-        foldAcc = Some(initAcc)
+        foldAcc = Some(eval(init))
 
         foldNext = Some(b0)
-        foldAcc = Some(eval(body)._1)
+        foldAcc = Some(eval(body))
         foldNext = Some(b1)
-        foldAcc = Some(eval(body)._1)
+        foldAcc = Some(eval(body))
         foldNext = Some(b2)
-        foldAcc = Some(eval(body)._1)
+        foldAcc = Some(eval(body))
         foldNext = Some(b3)
-        foldAcc = Some(eval(body)._1)
+        foldAcc = Some(eval(body))
         foldNext = Some(b4)
-        foldAcc = Some(eval(body)._1)
+        foldAcc = Some(eval(body))
         foldNext = Some(b5)
-        foldAcc = Some(eval(body)._1)
+        foldAcc = Some(eval(body))
         foldNext = Some(b6)
-        foldAcc = Some(eval(body)._1)
+        foldAcc = Some(eval(body))
         foldNext = Some(b7)
         val result = eval(body)
 
@@ -99,32 +95,30 @@ object Semantics {
         result
       }
 
-      else if (tryGetUnaryOp(e.head).isDefined) {
-        val (v, rest) = eval(e.next)
-        (e.head match {
-          case Not => ~v
-          case Shl1 => v << 1
-          case Shr1 => v >>> 1
-          case Shr4 => v >>> 4
-          case Shr16 => v >>> 16
-          case _ => throw UnexpectedOperator("unary", e.head)
-        }, rest)
+      case UApp(op, e) => {
+        val v = eval(e)
+        op match {
+          case Operator.Not => ~v
+          case Operator.Shl1 => v << 1
+          case Operator.Shr1 => v >>> 1
+          case Operator.Shr4 => v >>> 4
+          case Operator.Shr16 => v >>> 16
+          case _ => throw UnexpectedOperator("unary", op)
+        }
       }
-        
 
-      else if (tryGetBinaryOp(e.head).isDefined) {
-        val (v1, rest1) = eval(e.next)
-        val (v2, rest2) = eval(rest1)
-        (e.head match {
-          case And => v1 & v2
-          case Or => v1 | v2
-          case Xor => v1 ^ v2
-          case Plus => v1 + v2
-          case _ => throw UnexpectedOperator("binary", e.head)
-        }, rest2)
+      case BApp(op, e1, e2) => {
+        val v1 = eval(e1)
+        val v2 = eval(e2)
+        op match {
+          case Operator.And => v1 & v2
+          case Operator.Or => v1 | v2
+          case Operator.Xor => v1 ^ v2
+          case Operator.Plus => v1 + v2
+          case _ => throw UnexpectedOperator("binary", op)
+        }
       }
-    
-      else throw UnexpectedOperator("unknown operator", e.head)
+    }
   }
 
 }
