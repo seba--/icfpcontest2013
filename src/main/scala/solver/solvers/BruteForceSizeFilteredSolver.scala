@@ -7,7 +7,7 @@ import solver.strategies.BruteForceInitialDataStrategy
 import solver.mutators.LinearMutator
 import solver.filter.SizeFilter
 import solver.fitness.ConstantFitness
-import lang.FlatAbstract._
+import lang.Abstract._
 
 class BruteForceSizeFilteredSolver extends Solver {
   var strategy: Strategy = null

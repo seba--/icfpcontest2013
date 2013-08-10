@@ -1,7 +1,7 @@
 package lang
 
 import org.scalatest.FunSuite
-import lang.FlatAbstract._
+import lang.Abstract._
 import lang.Semantics.eval
 import datacollection.TrainingProblemStore
 import java.io.File
@@ -36,9 +36,14 @@ class SomeTests extends FunSuite {
   }
 
   test("0 to 255 for all downloaded training problems") {
+    println("START deserialization")
     val store = TrainingProblemStore(new File("problems/train3"))
-    store.allProblems.foreach { problem =>
+    val all = store.allProblems
+    println("FINISHED deserialization")
+    all.foreach { problem =>
+      println("Test " + problem.id)
       val program = Concrete.parse(problem.challenge)
+      if (problem.evaluationResults != null)
       problem.evaluationResults.foreach {
         case (input, output) =>
           val longInput = Semantics.fromString(input)

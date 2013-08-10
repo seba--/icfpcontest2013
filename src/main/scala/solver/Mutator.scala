@@ -1,7 +1,6 @@
 package solver
 
-import lang.FlatAbstract.Node
-import lang.FlatAbstract.Exp
+import lang.Abstract._
 
 /**
  * Mutates one (partial) program to the next

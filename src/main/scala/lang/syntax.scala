@@ -13,18 +13,18 @@ object Abstract {
   }
   type Operator = Operator.Value
 
-  case class Prg(x: Id, e: Exp) { 
-    override def toString = "(lambda (" + x + ") " + e + ")" 
-  }
+  def printProgram(e: Exp) = "(lambda (" + "main_var" + ") " + e + ")" 
   
   abstract class Exp
   case class Zero() extends Exp { override def toString = "0" }
   case class One() extends Exp { override def toString = "1" }
-  case class Var(x: Id) extends Exp { override def toString = x }
-  case class IfZero(cond: Exp, yes: Exp, no: Exp) extends Exp { override def toString = "(if0 " + cond + " " + yes + " " + no + ")" }
-  case class Fold(over: Exp, init: Exp, f: FoldFun) extends Exp { override def toString = "(fold " + over+ " " + init + " " + f + ")" }
-  case class UApp(op: Operator, e: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e + ")" }
-  case class BApp(op: Operator, e1: Exp, e2: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e1 + " " + e2 + ")" }
+  case class MainVar() extends Exp { override def toString = "main_var" }
+  case class FoldNext() extends Exp { override def toString = "fold_next" }
+  case class FoldAcc() extends Exp { override def toString = "fold_var" }
+  case class IfZero(var cond: Exp, var yes: Exp, var no: Exp) extends Exp { override def toString = "(if0 " + cond + " " + yes + " " + no + ")" }
+  case class Fold(var over: Exp, var init: Exp, var body: Exp) extends Exp { override def toString = "(fold " + over+ " " + init + " " + "(lambda (" + "fold_next" + " " + "fold_acc" + ") " + body + ")" + ")" }
+  case class UApp(var op: Operator, var e: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e + ")" }
+  case class BApp(var op: Operator, var e1: Exp, var e2: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e1 + " " + e2 + ")" }
   case class Box() extends Exp {
     var e : Exp = null
     def isEmpty : Boolean = e == null    
@@ -32,148 +32,144 @@ object Abstract {
       if (isEmpty) "?" else e.toString()
     }
   }
-  
-  final case class FoldFun(next: Id, acc: Id, body: Exp) { 
-    override def toString = "(lambda (" + next + " " + acc + ") " + body + ")" 
-  }
 }
 
 
-object FlatAbstract {
-  
-  object Node extends Enumeration {
-    val Zero, One, MainVar = Value
-    val IfZero, Fold, FoldNext, FoldAcc = Value
-    val Not, Shl1, Shr1, Shr4, Shr16 = Value
-    val And, Or, Xor, Plus = Value
-    val TFold = Value
-  }
-  type Node = Node.Value
-  import Node._
-  
-  def getNode(s: String) = s match {
-    case "not" => Not
-    case "shl1" => Shl1
-    case "shr1" => Shr1
-    case "shr4" => Shr4
-    case "shr16" => Shr16
-    case "and" => And
-    case "or" => Or
-    case "xor" => Xor
-    case "plus" => Plus
-    case "if0" => IfZero
-    case "fold" => Fold
-    case "tfold" => TFold
-  }
-
-  
-  type Exp = DoubleLinkedList[Node]
-  
-  
-  def makeFlat(p: Abstract.Prg): Exp = makeFlat(p.e, p.x)
-  
-  def makeFlat(
-      e: Abstract.Exp, 
-      mainVar: Abstract.Id,
-      foldNextVar: Abstract.Id = null, 
-      foldAccVar: Abstract.Id = null): Exp = e match {
-    case Abstract.Zero() => DoubleLinkedList(Zero)
-    case Abstract.One() => DoubleLinkedList(One)
-    case Abstract.Var(v) if foldNextVar != null && v == foldNextVar => DoubleLinkedList(FoldNext)
-    case Abstract.Var(v) if foldAccVar != null && v == foldAccVar => DoubleLinkedList(FoldAcc)
-    case Abstract.Var(v) if v == mainVar => DoubleLinkedList(MainVar)
-    case Abstract.Var(v) => sys.error("Cannot convert unknown variable " + v)
-    case Abstract.IfZero(cond, yes, no) => (DoubleLinkedList(IfZero) ++ makeFlat(cond, mainVar, foldNextVar, foldAccVar)
-                                                                     ++ makeFlat(yes, mainVar, foldNextVar, foldAccVar)
-                                                                     ++ makeFlat(no, mainVar, foldNextVar, foldAccVar))
-    case Abstract.Fold(over, init, Abstract.FoldFun(next, acc, body)) =>
-      (DoubleLinkedList(Fold) ++ makeFlat(over, mainVar, foldNextVar, foldAccVar)
-                              ++ makeFlat(init, mainVar, foldNextVar, foldAccVar)
-                              ++ makeFlat(body, mainVar, next, acc))
-    case Abstract.UApp(op, e) =>
-      DoubleLinkedList(makeUnaryOp(op)) ++ makeFlat(e, mainVar, foldNextVar, foldAccVar)
-    case Abstract.BApp(op, e1, e2) =>
-      DoubleLinkedList(makeBinaryOp(op)) ++ makeFlat(e1, mainVar, foldNextVar, foldAccVar) ++ makeFlat(e2, mainVar, foldNextVar, foldAccVar)
-  }
-  
-  def makeUnaryOp(op: Abstract.Operator) = 
-    op match {
-      case Abstract.Operator.Not => Not
-      case Abstract.Operator.Shl1 => Shl1
-      case Abstract.Operator.Shr1 => Shr1
-      case Abstract.Operator.Shr4 => Shr4
-      case Abstract.Operator.Shr16=> Shr16
-    }
-
-  def makeBinaryOp(op: Abstract.Operator) = 
-    op match {
-      case Abstract.Operator.And => And
-      case Abstract.Operator.Or => Or
-      case Abstract.Operator.Xor => Xor
-      case Abstract.Operator.Plus => Plus
-    }
-  
-  def makeStructuralPrg(e: Exp): Abstract.Prg = {
-    val (exp, rest) = makeStructural(e)
-    if (!rest.isEmpty)
-      throw new IllegalStateException("Expected empty rest list")
-    Abstract.Prg("main_var", exp)
-  }
-  
-  def makeStructural(e: Exp): (Abstract.Exp, Exp) = 
-    if (e.head == Zero)
-      (Abstract.Zero(), e.next)
-    else if (e.head == One)
-      (Abstract.One(), e.next)
-    else if (e.head == MainVar)
-      (Abstract.Var("main_var"), e.next)
-    else if (e.head == FoldNext)
-      (Abstract.Var("fold_next"), e.next)
-    else if (e.head == FoldAcc)
-      (Abstract.Var("fold_acc"), e.next)
-    else if (e.head == IfZero) {
-      val (cond, rest1) = makeStructural(e.next)
-      val (yes, rest2)  = makeStructural(rest1)
-      val (no, rest3)   = makeStructural(rest2)
-      (Abstract.IfZero(cond, yes, no), rest3)
-    }
-    else if (e.head == Fold) {
-      val (over, rest1) = makeStructural(e.next)
-      val (init, rest2)  = makeStructural(rest1)
-      val (body, rest3)   = makeStructural(rest2)
-      (Abstract.Fold(over, init, Abstract.FoldFun("fold_next", "fold_acc", body)), rest3)
-    }
-    else {
-      val (e1, rest1) = makeStructural(e.next)
-      tryGetUnaryOp(e.head) match {
-        case Some(op) => (Abstract.UApp(op, e1), rest1)
-        case None => tryGetBinaryOp(e.head) match {
-          case Some(op) => {
-            val (e2, rest2) = makeStructural(rest1)
-            (Abstract.BApp(op, e1, e2), rest2)
-          }
-          case None => sys.error("illegal operator " + e.head)
-        }
-      }
-    } 
-  
-  def tryGetUnaryOp(n: Node) = n match {
-    case Not => Some(Abstract.Operator.Not)
-    case Shl1 => Some(Abstract.Operator.Shl1)
-    case Shr1 => Some(Abstract.Operator.Shr1)
-    case Shr4 => Some(Abstract.Operator.Shr4)
-    case Shr16 => Some(Abstract.Operator.Shr16)
-    case _ => None
-  }
-
-  def tryGetBinaryOp(n: Node) = n match {
-    case And => Some(Abstract.Operator.And)
-    case Or => Some(Abstract.Operator.Or)
-    case Xor => Some(Abstract.Operator.Xor)
-    case Plus => Some(Abstract.Operator.Plus)
-    case _ => None
-  }
-}
+//object FlatAbstract {
+//  
+//  object Node extends Enumeration {
+//    val Zero, One, MainVar = Value
+//    val IfZero, Fold, FoldNext, FoldAcc = Value
+//    val Not, Shl1, Shr1, Shr4, Shr16 = Value
+//    val And, Or, Xor, Plus = Value
+//    val TFold = Value
+//  }
+//  type Node = Node.Value
+//  import Node._
+//  
+//  def getNode(s: String) = s match {
+//    case "not" => Not
+//    case "shl1" => Shl1
+//    case "shr1" => Shr1
+//    case "shr4" => Shr4
+//    case "shr16" => Shr16
+//    case "and" => And
+//    case "or" => Or
+//    case "xor" => Xor
+//    case "plus" => Plus
+//    case "if0" => IfZero
+//    case "fold" => Fold
+//    case "tfold" => TFold
+//  }
+//
+//  
+//  type Exp = DoubleLinkedList[Node]
+//  
+//  
+//  def makeFlat(p: Abstract.Prg): Exp = makeFlat(p.e, p.x)
+//  
+//  def makeFlat(
+//      e: Abstract.Exp, 
+//      mainVar: Abstract.Id,
+//      foldNextVar: Abstract.Id = null, 
+//      foldAccVar: Abstract.Id = null): Exp = e match {
+//    case Abstract.Zero() => DoubleLinkedList(Zero)
+//    case Abstract.One() => DoubleLinkedList(One)
+//    case Abstract.Var(v) if foldNextVar != null && v == foldNextVar => DoubleLinkedList(FoldNext)
+//    case Abstract.Var(v) if foldAccVar != null && v == foldAccVar => DoubleLinkedList(FoldAcc)
+//    case Abstract.Var(v) if v == mainVar => DoubleLinkedList(MainVar)
+//    case Abstract.Var(v) => sys.error("Cannot convert unknown variable " + v)
+//    case Abstract.IfZero(cond, yes, no) => (DoubleLinkedList(IfZero) ++ makeFlat(cond, mainVar, foldNextVar, foldAccVar)
+//                                                                     ++ makeFlat(yes, mainVar, foldNextVar, foldAccVar)
+//                                                                     ++ makeFlat(no, mainVar, foldNextVar, foldAccVar))
+//    case Abstract.Fold(over, init, Abstract.FoldFun(next, acc, body)) =>
+//      (DoubleLinkedList(Fold) ++ makeFlat(over, mainVar, foldNextVar, foldAccVar)
+//                              ++ makeFlat(init, mainVar, foldNextVar, foldAccVar)
+//                              ++ makeFlat(body, mainVar, next, acc))
+//    case Abstract.UApp(op, e) =>
+//      DoubleLinkedList(makeUnaryOp(op)) ++ makeFlat(e, mainVar, foldNextVar, foldAccVar)
+//    case Abstract.BApp(op, e1, e2) =>
+//      DoubleLinkedList(makeBinaryOp(op)) ++ makeFlat(e1, mainVar, foldNextVar, foldAccVar) ++ makeFlat(e2, mainVar, foldNextVar, foldAccVar)
+//  }
+//  
+//  def makeUnaryOp(op: Abstract.Operator) = 
+//    op match {
+//      case Abstract.Operator.Not => Not
+//      case Abstract.Operator.Shl1 => Shl1
+//      case Abstract.Operator.Shr1 => Shr1
+//      case Abstract.Operator.Shr4 => Shr4
+//      case Abstract.Operator.Shr16=> Shr16
+//    }
+//
+//  def makeBinaryOp(op: Abstract.Operator) = 
+//    op match {
+//      case Abstract.Operator.And => And
+//      case Abstract.Operator.Or => Or
+//      case Abstract.Operator.Xor => Xor
+//      case Abstract.Operator.Plus => Plus
+//    }
+//  
+//  def makeStructuralPrg(e: Exp): Abstract.Prg = {
+//    val (exp, rest) = makeStructural(e)
+//    if (!rest.isEmpty)
+//      throw new IllegalStateException("Expected empty rest list")
+//    Abstract.Prg("main_var", exp)
+//  }
+//  
+//  def makeStructural(e: Exp): (Abstract.Exp, Exp) = 
+//    if (e.head == Zero)
+//      (Abstract.Zero(), e.next)
+//    else if (e.head == One)
+//      (Abstract.One(), e.next)
+//    else if (e.head == MainVar)
+//      (Abstract.Var("main_var"), e.next)
+//    else if (e.head == FoldNext)
+//      (Abstract.Var("fold_next"), e.next)
+//    else if (e.head == FoldAcc)
+//      (Abstract.Var("fold_acc"), e.next)
+//    else if (e.head == IfZero) {
+//      val (cond, rest1) = makeStructural(e.next)
+//      val (yes, rest2)  = makeStructural(rest1)
+//      val (no, rest3)   = makeStructural(rest2)
+//      (Abstract.IfZero(cond, yes, no), rest3)
+//    }
+//    else if (e.head == Fold) {
+//      val (over, rest1) = makeStructural(e.next)
+//      val (init, rest2)  = makeStructural(rest1)
+//      val (body, rest3)   = makeStructural(rest2)
+//      (Abstract.Fold(over, init, Abstract.FoldFun("fold_next", "fold_acc", body)), rest3)
+//    }
+//    else {
+//      val (e1, rest1) = makeStructural(e.next)
+//      tryGetUnaryOp(e.head) match {
+//        case Some(op) => (Abstract.UApp(op, e1), rest1)
+//        case None => tryGetBinaryOp(e.head) match {
+//          case Some(op) => {
+//            val (e2, rest2) = makeStructural(rest1)
+//            (Abstract.BApp(op, e1, e2), rest2)
+//          }
+//          case None => sys.error("illegal operator " + e.head)
+//        }
+//      }
+//    } 
+//  
+//  def tryGetUnaryOp(n: Node) = n match {
+//    case Not => Some(Abstract.Operator.Not)
+//    case Shl1 => Some(Abstract.Operator.Shl1)
+//    case Shr1 => Some(Abstract.Operator.Shr1)
+//    case Shr4 => Some(Abstract.Operator.Shr4)
+//    case Shr16 => Some(Abstract.Operator.Shr16)
+//    case _ => None
+//  }
+//
+//  def tryGetBinaryOp(n: Node) = n match {
+//    case And => Some(Abstract.Operator.And)
+//    case Or => Some(Abstract.Operator.Or)
+//    case Xor => Some(Abstract.Operator.Xor)
+//    case Plus => Some(Abstract.Operator.Plus)
+//    case _ => None
+//  }
+//}
 
 
 
@@ -185,19 +181,19 @@ object Concrete {
   
   type Result[A] = (A, String)
   
-  def parse(s: String): FlatAbstract.Exp = {
+  def parse(s: String): Exp = {
     val (p, rest) = parsePrg(s)
     if (!rest.isEmpty)
       throw ParseException("Expected end of file", rest)
-    FlatAbstract.makeFlat(p)
+    p
   }
   
-  def parsePrg: String => Result[Prg] =
+  def parsePrg: String => Result[Exp] =
     inParens(s => {
       val (_, s1) = word("lambda")(layout(s))
       val (x, s2) = inParens(parseId)(layout(s1))
-      val (e, s3) = parseExp(layout(s2))
-      (Prg(x, e), s3)
+      val (e, s3) = parseExp(layout(s2), x, null, null)
+      (e, s3)
     })
       
   
@@ -219,44 +215,50 @@ object Concrete {
              throw ParseException("Expected identifier", s)
   }
   
-  def parseExp(s: String): Result[Exp] =
+  def parseExp(s: String, mainVar: String, foldNext: String, foldVar: String): Result[Exp] =
     if (s.startsWith("0"))
       (Zero(), s.substring(1))
     else if (s.startsWith("1"))
       (One(), s.substring(1))
     else if (s.size > 0 && (s(0) >= 'a' && s(0) <= 'z')) {
       val (x, s2) = parseId(s)
-      (Var(x), s2)
+      if (x == foldNext)
+        (FoldNext(), s2)
+      else if (x == foldVar)
+        (FoldAcc(), s2)
+      else if (x == mainVar)
+        (MainVar(), s2)
+      else throw ParseException("Unbound variable " + x, s2)
     }
     else
-      inParens(parseExp1)(s)
+      inParens(parseExp1(mainVar, foldNext, foldVar))(s)
   
-  def parseExp1(s: String): Result[Exp] =
+  def parseExp1(mainVar: String, foldNext: String, foldVar: String)(s: String): Result[Exp] =
     if (s.startsWith("if0")) {
       val (_, s1) = word("if0")(layout(s))
-      val (e1, s2) = parseExp(layout(s1))
-      val (e2, s3) = parseExp(layout(s2))
-      val (e3, s4) = parseExp(layout(s3))
+      val (e1, s2) = parseExp(layout(s1), mainVar, foldNext, foldVar)
+      val (e2, s3) = parseExp(layout(s2), mainVar, foldNext, foldVar)
+      val (e3, s4) = parseExp(layout(s3), mainVar, foldNext, foldVar)
       (IfZero(e1, e2, e3), s4)
     }
     else if (s.startsWith("fold")) {
       val (_, s1) = word("fold")(layout(s))
-      val (e1, s2) = parseExp(layout(s1))
-      val (e2, s3) = parseExp(layout(s2))
-      val (f, s4) = inParens(parseFoldFun)(layout(s3))
+      val (e1, s2) = parseExp(layout(s1), mainVar, foldNext, foldVar)
+      val (e2, s3) = parseExp(layout(s2), mainVar, foldNext, foldVar)
+      val (f, s4) = inParens(parseFoldFun(mainVar))(layout(s3))
       (Fold(e1, e2, f), s4)
     }
     else {
       tryParseUnary(layout(s)) match {
         case Some((op, s2)) => {
-          val (e, s3) = parseExp(layout(s2))
+          val (e, s3) = parseExp(layout(s2), mainVar, foldNext, foldVar)
           (UApp(op, e), s3)
         }
         case None =>
           tryParseBinary(layout(s)) match {
             case Some((op, s2)) => {
-              val (e1, s3) = parseExp(layout(s2))
-              val (e2, s4) = parseExp(layout(s3))
+              val (e1, s3) = parseExp(layout(s2), mainVar, foldNext, foldVar)
+              val (e2, s4) = parseExp(layout(s3), mainVar, foldNext, foldVar)
               (BApp(op, e1, e2), s4)
             }
             case None => throw ParseException("Expected expression", s)
@@ -321,15 +323,15 @@ object Concrete {
       }
     }
 
-  def parseFoldFun(s: String): Result[FoldFun] = {
+  def parseFoldFun(mainVar: String)(s: String): Result[Exp] = {
     val (_, s1) = word("lambda")(layout(s))
     val ((x,y), s2) = inParens({s =>
         val (x, s21) = parseId(layout(s))
         val (y, s22) = parseId(layout(s21))
         ((x, y), s22)
       })(layout(s1))
-    val (e, s3) = parseExp(layout(s2))
-    (FoldFun(x, y, e), s3)
+    val (e, s3) = parseExp(layout(s2), mainVar, x, y)
+    (e, s3)
   }
     
   def layout(s: String): String = {

@@ -1,6 +1,6 @@
 package solver
 
-import lang.FlatAbstract.Exp
+import lang.Abstract.Exp
 
 /**
  * Filter intermediate programs.
