@@ -32,6 +32,20 @@ object Abstract {
       if (isEmpty) "?" else e.toString()
     }
   }
+  
+  def getOperator(e: Exp) : Option[Operator] = e match {
+    case b@Box() => if (b.isEmpty) None else getOperator(b.e)
+    case Zero() => None
+    case One() => None
+    case MainVar() => None
+    case FoldNext() => None
+    case FoldAcc() => None
+    case IfZero(cond, yes, no) => Some(Operator.If0)
+    case Fold(over, init, body) => Some(Operator.Fold)
+    case UApp(op, e) => Some(op)
+    case BApp(op, e1, e2) => Some(op)
+
+  }
 }
 
 
