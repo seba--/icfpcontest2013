@@ -7,7 +7,6 @@ import solver.ProblemSpec
 import solver.ProblemSpec
 import lang.Abstract._
 import lang.Abstract.Operator._
-import scala.collection.mutable.Map
 
 class TFoldConditionFilterTest extends FilterTest {
   override def createFilter() : Filter = new TFoldConditionFilter
