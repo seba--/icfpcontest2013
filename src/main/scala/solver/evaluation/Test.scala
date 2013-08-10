@@ -4,13 +4,7 @@ import java.io.File
 import datacollection.TrainingProblemStore
 import solver.solvers.BruteForceSizeFilteredSolver
 import datacollection.BotApp
-import org.jfree.data.xy.XYDataset
-import org.jfree.data.xy.DefaultXYDataset
-import org.jfree.chart.ChartFactory
-import org.jfree.chart.plot.PlotOrientation
-import org.jfree.chart.ChartFrame
 import javax.swing.WindowConstants
-import org.jfree.chart.plot.XYPlot
 
 object Test extends App {
     val store = new TrainingProblemStore(new File("problems/train3"))
