@@ -11,7 +11,7 @@ import java.lang.reflect.Method
 
 class DoubleFoldFilterTest extends FilterTest {
 
-  override def createFilter() : Filter = new DoubleFoldFilter
+  override def createFilter() : Filter = new ValidFoldFilter
   
   test("accepts program without fold") {
     assertAccepts("(lambda (x) (plus x (shr4 x)))")
