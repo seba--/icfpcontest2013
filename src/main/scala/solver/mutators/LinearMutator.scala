@@ -31,7 +31,8 @@ object LinearMutator extends Mutator {
         if (newExp.isEmpty)
           None
         else {
-          Some(e)
+          lastModified = newExp
+          newExp
         }
       }
       case Right(false) => throw new IllegalStateException("expression does not contain the last modified expression")

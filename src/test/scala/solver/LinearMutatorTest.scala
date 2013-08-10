@@ -5,16 +5,34 @@ import lang.Abstract._
 import lang.Abstract.Operator._
 import scala.collection.mutable.DoubleLinkedList
 import solver.mutators.LinearMutator
+import lang.Metadata
 
-class LinearMutatorTest extends FunSuite {
+class LinearMutatorTest1 extends FunSuite {
   test("gernerate Not-Programs") {
-    LinearMutator.init(new ProblemSpec("", 0, List(Not), null))
+    LinearMutator.init(new ProblemSpec("", 0, List(Not, And), null))
     var actualProgram : Exp = Box()
     for (_ <- 0 to 100) {
       actualProgram = LinearMutator.stepInto(actualProgram).get
+      // should be only "not"s
       println(actualProgram)
     }
   }
+}
+
+class LinearMutatorTest2 extends FunSuite {
+  test("gernerate Not/And-Programs") {
+    LinearMutator.init(new ProblemSpec("", 0, List(Not, And), null))
+    var actualProgram : Exp = Box()
+    for (_ <- 0 to 100) {
+      if (Metadata.size(actualProgram) > 6)
+        actualProgram = LinearMutator.stepOver(actualProgram).get
+      else
+        actualProgram = LinearMutator.stepInto(actualProgram).get
+      // should be only "not"s
+      println(actualProgram)
+    }
+  }
+
 //  test("mutate Node") {
 //    LinearMutator.init(new ProblemSpec("", 10, List(And, Or, Xor), null))
 //    val expected = List(Zero -> One,

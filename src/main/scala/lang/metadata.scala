@@ -7,7 +7,7 @@ object Metadata {
   def size(e: Exp): Int = 1 + size_(e)
   
   def size_(e: Exp): Int = e match {
-    case b@Box() => if (b.isEmpty) 0 else size_(b.e)
+    case b@Box() => if (b.isEmpty) 1 else size_(b.e)
     case Zero() => 1 
     case One() => 1
     case MainVar() => 1
