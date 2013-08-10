@@ -1,10 +1,11 @@
 package datacollection
 
 import json.JsonParser
+import BotApp._
 import http.IcfpcHttpCommunication
 import model.TrainingProblem
 
-object DownloadTrainProblem extends BotApp {
+object DownloadTrainProblem extends App {
   while (true) {
     try {
       log("Attempting download..")

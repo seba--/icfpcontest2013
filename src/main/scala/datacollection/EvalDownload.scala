@@ -10,8 +10,9 @@ import scala.collection.mutable.Queue
 import java.io.File
 import com.sun.xml.internal.bind.v2.TODO
 import model.EvalResponse
+import BotApp._
 
-object EvalDownload extends BotApp {
+object EvalDownload extends App {
   def requestEvalResults(problem: TrainingProblem, inputs: List[String]): List[(String, String)] = requestEvalResults(problem.id, inputs)
 
   def requestEvalResults(id: String, arguments: List[String]): List[(String, String)] = {
