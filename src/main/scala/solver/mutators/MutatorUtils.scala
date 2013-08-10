@@ -24,9 +24,9 @@ object MutatorUtils {
     case b@Box() => if (b.isEmpty) Some(Zero()) else getNextMinimalExpression(b.e, ops)
     case Zero() => Some(One()) 
     case One() => Some(MainVar())
-    case MainVar() => Some(FoldNext())
-    case FoldNext() => Some(FoldAcc())
-    case FoldAcc() => Some(getMinimalExpressionForOperator(ops.head))
+    case MainVar() => Some(FoldAcc())
+    case FoldAcc() => Some(FoldNext())
+    case FoldNext() => Some(getMinimalExpressionForOperator(ops.head))
     case _ => {
       val op = getOperator(e).get
       val pos = ops.indexOf(op)
