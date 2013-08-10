@@ -40,15 +40,15 @@ case class TestSolver(solver: Solver) {
 class BruteForceSizeFilteredSolverTest extends FunSuite {
   val store = TrainingProblemStore(new File("problems/trainWith0to255eval"))
 
-//  test("4n75sUkFvpQxpD3zhSTQg7mE") {
-//    testProblem(store.read("4n75sUkFvpQxpD3zhSTQg7mE"))
-//  }
+  test("bgCBAh2b5uf94sB6zuq2mXwG") {
+    testProblem(store.read("bgCBAh2b5uf94sB6zuq2mXwG"))
+  }
 
-    test("BruteForceSizeFilteredSolver") {
-      store.allProblems.foreach { problem =>
-        testProblem(problem)
-      }
-    }
+//    test("BruteForceSizeFilteredSolver") {
+//      store.allProblems.foreach { problem =>
+//        testProblem(problem)
+//      }
+//    }
 
   def testProblem(problem: TrainingProblem) {
     val ops = problem.operators.map(lang.Concrete.tryParseOperator(_).get)
