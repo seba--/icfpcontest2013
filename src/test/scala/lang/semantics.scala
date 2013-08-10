@@ -36,7 +36,7 @@ class SomeTests extends FunSuite {
   }
 
   test("0 to 255 for all downloaded training problems") {
-    val store = TrainingProblemStore(new File("problems/trainWith0to255eval"))
+    val store = TrainingProblemStore(new File("problems/train3"))
     store.allProblems.foreach { problem =>
       val program = Concrete.parse(problem.challenge)
       problem.evaluationResults.foreach {

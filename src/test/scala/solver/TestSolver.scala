@@ -30,7 +30,7 @@ case class TestSolver(solver: Solver) {
 }
 
 class BruteForceSizeFilteredSolverTest extends FunSuite {
-  val store = TrainingProblemStore(new File("problems/trainWith0to255eval"))
+  val store = TrainingProblemStore(new File("problems/train3"))
   
   test("4n75sUkFvpQxpD3zhSTQg7mE") {
     testProblem(store.read("4n75sUkFvpQxpD3zhSTQg7mE"))

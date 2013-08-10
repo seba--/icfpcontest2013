@@ -8,7 +8,7 @@ import datacollection.TrainingProblemStore
 
 object TestEvaluator extends App {
   // MODIFY THIS TO WHATEVER YOU NEED!
-  val store = new TrainingProblemStore(new File("problems/trainWith0to255eval"))
+  val store = new TrainingProblemStore(new File("problems/train3"))
   
   var failed: Set[String] = Set()
   for (id <- store.ids) {

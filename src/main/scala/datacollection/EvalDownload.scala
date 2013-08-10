@@ -20,37 +20,49 @@ object EvalDownload extends BotApp {
     arguments.zip(JsonParser.deserialize(result, classOf[EvalResponse]).get)
   }
 
-  val inputStore = TrainingProblemStore.default
-  val targetStore = TrainingProblemStore(new File("problems/trainWith0to255eval"))
-  val requests = (0L to 255L).toList.map { Semantics.toString(_) }
-  val toDownload = Queue[TrainingProblem]()
-  inputStore.ids().foreach {
-    (id =>
-      if (!targetStore.contains(id)) toDownload += inputStore.read(id))
-  }
-  log("Starting: " + toDownload.size + " problems in queue")
+  def doDownloads(inputStore: TrainingProblemStore, targetStore: TrainingProblemStore, requests: Iterable[Long]) {
+    val translatedRequests = requests.toList.map { Semantics.toString(_) }
+    val toDownload = Queue[TrainingProblem]()
+    inputStore.ids().foreach {
+      (id =>
+        if (!targetStore.contains(id)) toDownload += inputStore.read(id))
+    }
+    log("Starting: " + toDownload.size + " problems in queue")
 
-  while (!toDownload.isEmpty) {
-    val problem = toDownload.dequeue()
-    try {
-      log("Attempting to eval for " + problem.id)
+    while (!toDownload.isEmpty) {
+      val problem = toDownload.dequeue()
+      try {
+        log("Attempting to eval for " + problem.id)
 
-      val newResults = EvalDownload.requestEvalResults(problem, requests)
-      val updatedResults = if (problem.evaluationResults == null) {
-        newResults.toMap
-      } else {
-        problem.evaluationResults ++ newResults
+        val newResults = requestEvalResults(problem, translatedRequests)
+        val updatedResults = if (problem.evaluationResults == null) {
+          newResults.toMap
+        } else {
+          problem.evaluationResults ++ newResults
+        }
+        val updatedProblem = problem.copy(evaluationResults = updatedResults)
+        targetStore.write(updatedProblem);
+        log("done problem: " + problem.id + ", " + toDownload.size + " items left.")
+        wait(4)
+      } catch {
+        case e: Exception =>
+          log("Exception: " + e.getMessage())
+          // requeue for later processing
+          toDownload += problem
+          wait(1)
       }
-      val updatedProblem = problem.copy(evaluationResults = updatedResults)
-      targetStore.write(updatedProblem);
-      log("done problem: " + problem.id + ", " + toDownload.size + " items left.")
-      wait(5)
-    } catch {
-      case e: Exception =>
-        log("Exception: " + e.getMessage())
-        // requeue for later processing
-        toDownload += problem
-        wait(1)
     }
   }
+
+  val singleBitSet = for (i <- (0 to 63)) yield { 1L << i }
+  val twoBitsSetEquidistant = for (i <- (0 to 31)) yield { ((1L << 32) + 1L) << i }
+  val twoBitsSetVShape = for (i <- (0 to 31)) yield { (1L << (63 - i)) + (1L << i) }
+  val bitsSet = singleBitSet ++ twoBitsSetEquidistant ++ twoBitsSetVShape
+  val bitsUnset = bitsSet.map { ~_ }
+  val requests = bitsSet ++ bitsUnset
+
+  val tempStore = TrainingProblemStore(new File("problems/trainWith0to255eval"))
+  val finalStore = TrainingProblemStore(new File("problems/train3"))
+//  doDownloads(TrainingProblemStore.default, tempStore, 0L to 255L)
+  doDownloads(tempStore, finalStore, requests)
 }
