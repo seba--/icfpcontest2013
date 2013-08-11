@@ -98,7 +98,7 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
             Await.ready(solverPollingThread, Duration(500, MILLISECONDS))
           }
         }
-        
+
         try {
           def sholdContinue() = problem.solved != Some(true) && timeLeft() > 0 && (!solverPollingThread.isCompleted || !solutions.isEmpty)
 
@@ -145,8 +145,8 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
             }
           }
         } catch {
-          case e: HTTPException if (e.getMessage() == "412: already solved") =>
-            log("[Interact] already solved, skipping to next problem.");
+          case e: HTTPException if (e.getMessage() == "412: already solved" || e.getMessage() == "410: time limit exceeded") =>
+            log("[Interact] problem ended, skipping to next problem.");
         }
         killSolver()
         if (problem.solved != Some(true)) {
@@ -165,8 +165,8 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
         }
         // TODO store problem
       } catch {
-        case e: HTTPException if (e.getMessage() == "412: already solved") =>
-          log("[Interact] already solved, skipping to next problem.");
+        case e: HTTPException if (e.getMessage() == "412: already solved" || e.getMessage() == "410: time limit exceeded") =>
+          log("[Interact] problem ended, skipping to next problem.");
       }
     }
     log("[Interact] No more problems, terminating.")
