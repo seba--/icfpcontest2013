@@ -44,5 +44,5 @@ case class TrainingProblemStore(folder: File) {
 }
 
 object TrainingProblemStore {
-  val default = new TrainingProblemStore(new File("problems/train"))
+  lazy val default = new TrainingProblemStore(new File("problems/train"))
 }

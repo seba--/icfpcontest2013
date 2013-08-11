@@ -20,7 +20,7 @@ class BruteForceSizeFilteredSolver extends Solver {
 
   def init(problem: Problem) {
     problemSpec = ProblemSpec(problem)
-    strategy = new BruteForceInitialDataStrategy
+    strategy = new ParallelBruteForceStrategy
     val filters = List(
       // STEP_OVER-Filter
       new TFoldExistenceFilter, //OVER

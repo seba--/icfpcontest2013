@@ -24,4 +24,8 @@ class CompositeFilter(filters: List[Filter]) extends Filter {
 	//if using 'or' then sort the groups in ascending runtime to get an optimal overall runtime
 	def filter(e : Exp): Int =
 	  filters.foldLeft(OK)((curr, next) => or(curr, next.filter, e))
+	  
+	override def :: (filter : Filter) = {
+	  new CompositeFilter(filter :: filters)
+	}
 }

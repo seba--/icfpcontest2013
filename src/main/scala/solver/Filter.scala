@@ -1,6 +1,7 @@
 package solver
 
 import lang.Abstract.Exp
+import solver.filter.CompositeFilter
 
 /**
  * Filter intermediate programs.
@@ -13,6 +14,10 @@ trait Filter {
 
   // keep all expressions that satisfy the predicate
   def filter(e: Exp): Int
+
+  def ::(filter: Filter) = {
+    new CompositeFilter(List(filter, this))
+  }
 }
 
 object FilterV {
@@ -39,4 +44,5 @@ object FilterV {
   def or_(f1: (Exp) => Int, f2: (Exp) => Int, e: Exp): Int = {
     or(f1(e), f2, e)
   }
+
 }

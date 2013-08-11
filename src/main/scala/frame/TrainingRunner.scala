@@ -18,7 +18,7 @@ object TrainingRunner extends App {
     def next = {
       BotApp.sleep(4)
       if (math.random < .75) {
-        server.train(DontCare, theSize)
+        server.train(WithTFold, theSize)
       } else {
         server.train(WithTFold, theSize + 4)
       }

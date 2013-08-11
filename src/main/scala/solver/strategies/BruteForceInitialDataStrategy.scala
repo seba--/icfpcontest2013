@@ -10,13 +10,8 @@ import scala.collection.mutable.DoubleLinkedList
 import lang.Metadata
 import solver.FilterV
 
-class BruteForceInitialDataStrategy extends Strategy {
+class BruteForceInitialDataStrategy(var current: Exp)  extends AbstractStrategy {
   var isInterrupted = false
-  var current: Exp = Box()
-
-  def selfNotification(delta: Map[Long, Long]) {
-    // reset: this solver requires full initial data
-  }
 
   // Find next solution, or return None.
   def nextSolution(): Option[Exp] = {

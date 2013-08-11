@@ -15,7 +15,6 @@ import lang.Abstract.Operator._
 import solver.filter.EvalNeqZeroFilter
 import client.api.Problem
 import lang.Semantics.Value
-import solver.strategies.BruteForceStartExpStrategy
 import lang.Semantics
 import solver.filter.TFoldExistenceFilter
 import solver.filter.ShortcutShiftFilter
@@ -140,14 +139,14 @@ class PartialSolver extends Solver {
   }
 
   def createStrategy(spec: ProblemSpec, initial: Exp): Strategy = {
-    val strategy = new BruteForceStartExpStrategy(initial)
+    val strategy = new BruteForceInitialDataStrategy(initial)
     val filter = new CompositeFilter(defaultFilters ++ List(new EvalFilter))
     strategy.init(spec, new LinearMutator, filter, ConstantFitness(1.0))
     return strategy
   }
 
   def createConditionStrategy(spec: ProblemSpec): Strategy = {
-    val strategy = new BruteForceInitialDataStrategy
+    val strategy = new BruteForceInitialDataStrategy(Box())
     val filter = new CompositeFilter(defaultFilters ++ List(new EvalNeqZeroFilter))
     strategy.init(spec, new LinearMutator, filter, ConstantFitness(1.0))
     return strategy
