@@ -13,7 +13,8 @@ class BinaryComparisonFilter extends Filter {
       case UApp(_, e) => filter(e)
       case IfZero(cond, yes, no) => Math.max(filter(cond), Math.max(filter(yes), filter(no)))
       case lang.Abstract.Fold(over, init, body) => Math.max(filter(over), Math.max(filter(init), filter(body)))
-      case BApp(_, e1, e2) => if (compare(e1, e2) > 0) FilterV.STEP_INTO else FilterV.OK
+      case BApp(_, e1, e2) => Math.max(Math.max(filter(e1), filter(e2)),
+                                 if (compare(e1, e2) < 0) FilterV.STEP_INTO else FilterV.OK)
       case _ => FilterV.OK
     }
   }
