@@ -40,7 +40,7 @@ class BruteForceSizeFilteredSolverTest extends FunSuite {
 
 
   test("0PjBTiYHj7k3A6d0rLgZ254G") {
-    testProblem(client.api.Problem(store.read("0PjBTiYHj7k3A6d0rLgZ254G")))
+    testProblem(store.read("0PjBTiYHj7k3A6d0rLgZ254G").asProblem)
   }
 
 //  test("BruteForceSizeFilteredSolver") {

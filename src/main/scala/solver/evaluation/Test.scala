@@ -12,7 +12,7 @@ object Test extends App {
     val filteredProblems = store.allProblems.filter{p =>
       p.size <= 10 && !p.operators.contains("tfold")
     }
-    val evaluator = new CountCorrectInputsEvaluator(filteredProblems.map(Problem(_)))
+    val evaluator = new CountCorrectInputsEvaluator(filteredProblems.map(_.asProblem))
     evaluator.evaluate(new BruteForceSizeFilteredSolver)
 //
 //  val dataSet = new DefaultXYDataset()

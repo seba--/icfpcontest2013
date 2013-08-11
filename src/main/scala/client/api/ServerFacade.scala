@@ -16,7 +16,7 @@ import server.api.ProblemResponse
 
 case class Problem(id: String, size: Int, operators: List[Operator], solved: Boolean, timeLeft: Int, evaluationResults: Map[Long, Long], challenge: Exp)
 object Problem {
-  def apply(problem: ProblemResponse): Problem = {
+  def convert(problem: ProblemResponse): Problem = {
     val evaluationResultsAsLong = if (problem.evaluationResults == null) null else problem.evaluationResults.map {
       case (in, out) => Semantics.fromString(in) -> Semantics.fromString(out)
     }
@@ -53,12 +53,12 @@ class ServerFacade(theServer: Server) {
     val myProblems = JsonParser.mapper.readValues(parser, classOf[ProblemResponse])
     var result = List[Problem]()
     while (myProblems.hasNext()) {
-      result ::= client.api.Problem(myProblems.next())
+      result ::= myProblems.next().asProblem
     }
 //    result
     throw new SecurityException
   }
-  val trainingProblems: Seq[Problem] = trainingStore.allProblems.map { Problem(_) }
+  val trainingProblems: Seq[Problem] = trainingStore.allProblems.map { _.asProblem }
   def guess(id: String, program: Exp): GuessResponse = {
     GuessResponse(theServer.guess(new GuessRequest(id, s"(lambda (main_var) ${program.toString})")))
   }
@@ -70,6 +70,6 @@ class ServerFacade(theServer: Server) {
     theServer.status
   }
   def train(size: Int = 0): Problem = {
-    Problem(theServer.train(size))
+    theServer.train(size).asProblem
   }
 }

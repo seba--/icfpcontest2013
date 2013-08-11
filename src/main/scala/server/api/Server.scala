@@ -6,8 +6,11 @@ import datacollection.TrainingProblemStore
 import java.io.FileNotFoundException
 import lang.Abstract
 import lang.Concrete
+import client.api.Problem
 
-case class ProblemResponse(id: String, size: Int, operators: List[String], solved: Boolean, timeLeft: Int, evaluationResults: Map[String, String], challenge: String)
+case class ProblemResponse(id: String, size: Int, operators: List[String], solved: Boolean, timeLeft: Int, evaluationResults: Map[String, String], challenge: String){
+  lazy val asProblem = Problem.convert(this)
+}
 
 case class EvalRequest(id: String, arguments: Seq[String]) {
 //  try{

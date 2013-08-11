@@ -70,9 +70,16 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
               }
               true
             case None =>
-              log("[Solver] no more guesses.")
+              log("[Solver] no more guesses, solver terminated.")
               false
           }) {}
+        }
+        def killSolver() = {
+          if (!solverPollingThread.isCompleted) {
+            log("[Interact] Killing solver...")
+            solver.interrupt()
+            Await.result(solverPollingThread, Duration(100, MILLISECONDS))
+          }
         }
 
         def sholdContinue() = !problem.solved && timeLeft() > 0 && (!solverPollingThread.isCompleted || !solutions.isEmpty)
@@ -84,38 +91,36 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
             if (solutions.isEmpty) None else Some(solutions.dequeue())
           } match {
             case Some(program) =>
-              println("Sending guess: " + program.toString())
+              log("[Interact] Sending guess: " + program.toString())
               server.guess(problem.id, program) match {
                 case Win =>
-                  log("Correct guess! Awaiting solver termination...")
+                  log("[Interact] Correct guess!")
                   problem = problem.copy(solved = true)
-                  solver.interrupt()
-                  Await.result(solverPollingThread, Duration(100, MILLISECONDS))
-                  log("Solver terminated, continuing with next Problem.")
+                  killSolver()
                 case Error(message) =>
-                  log("Error: " + message)
-                //TODO do something
+                  log("[Interact] Error: " + message)
+                  //TODO do something
                 case Mismatch(in, out, _) =>
-                  log("Mismatch for input " + in + ", should result in " + out)
+                  log("[Interact] Mismatch for input " + Semantics.toString(in) + ", should result in " + Semantics.toString(out))
                   problem = problem.copy(evaluationResults = problem.evaluationResults + (in -> out))
                   solver.notifyNewData(Map(in -> out))
                   solutions.synchronized {
-                    solutions.filter { program =>
+                    log("[Interact] Dequeued %d incorrect solutions, %d left".format(solutions.dequeueAll { program =>
                       val actual = Semantics.eval(program)(in)
-                      val result = actual == out
-                      println((if (result) "passed" else "dropped (" + actual + ")") + ": " + program.toString())
-                      result
-                    }
+                      val correct = actual == out
+//                      println("[Solver] "+(if (correct) "passed" else "dropped (" + Semantics.toString(actual) + ")") + ": " + program.toString())
+                      !correct
+                    }.size, solutions.size))
                   }
               }
             case None =>
-              log("No guesses in queue, sending eval.")
+              log("[Interact] No guesses in queue, sending eval.")
               val newResults = downloadNextEvalResults()
               problem = problem.copy(evaluationResults = problem.evaluationResults ++ newResults)
               solver.notifyNewData(newResults.toMap)
           }
         }
-        // TODO interrupt solver here too
+        killSolver()
         // TODO store problem
       }
     }
