@@ -6,17 +6,17 @@ import lang.Abstract.Operator._
 object MutatorUtils {
   def getMinimalExpressionForOperator(op:Operator) : Exp = {
     op match {
-      case Not => UApp(Not, Zero())
-      case Shl1 => UApp(Shl1, Zero())
-      case Shr1 => UApp(Shr1, Zero())
-      case Shr4 => UApp(Shr4, Zero())
-      case Shr16 => UApp(Shr16, Zero())
-      case And => BApp(And, Zero(), Zero())
-      case Or => BApp(Or, Zero(), Zero())
-      case Plus => BApp(Plus, Zero(), Zero())
-      case Xor => BApp(Xor, Zero(), Zero())
-      case If0 => IfZero(Zero(), Zero(), Zero())
-      case Operator.Fold => lang.Abstract.Fold(Zero(), Zero(), Zero())
+      case Not => UApp(Not, MainVar())
+      case Shl1 => UApp(Shl1, One())
+      case Shr1 => UApp(Shr1, MainVar())
+      case Shr4 => UApp(Shr4, MainVar())
+      case Shr16 => UApp(Shr16, MainVar())
+      case And => BApp(And, Zero(), One())
+      case Or => BApp(Or, Zero(), One())
+      case Plus => BApp(Plus, Zero(), One())
+      case Xor => BApp(Xor, Zero(), One())
+      case If0 => IfZero(MainVar(), One(), Zero())
+      case Operator.Fold => lang.Abstract.Fold(Zero(), Zero(), FoldAcc())
       case Operator.TFold => lang.Abstract.Fold(Zero(), Zero(), Zero())
     }
   }
