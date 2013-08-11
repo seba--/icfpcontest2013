@@ -26,12 +26,15 @@ object InteractiveSolveAndGuess {
   private val twoBitPerByte = for (i <- 0 to 7) yield (0x1111111111111111L << i)
   private val bitPatterns = singleBits ++ oneBitPerByte ++ twoBitPerByte
   private val primes = Primes.primesUnder(1000)
-  private val patternNumbers = Set(~0L, 0L, ~0x5555555555555555L, 0x5555555555555555L) ++ bitPatterns ++ bitPatterns.map { ~_ } ++ primes ++ primes.map { _ + 1 }
-  def fillWithRandom(initial: Set[Long], size: Int) = {
+  private val patternNumbers = Seq(~0L, 0L, ~0x5555555555555555L, 0x5555555555555555L) ++ bitPatterns ++ bitPatterns.map { ~_ } ++ primes ++ primes.map { _ + 1 }
+  def fillWithRandom(initial: Seq[Long], size: Int) = {
     val random = new Random
     var numbers = initial
     while (numbers.size < size) {
-      numbers += random.nextLong()
+      val next = random.nextLong()
+      if(!numbers.contains(next)) {
+        numbers = numbers :+ next
+      }
     }
     numbers
   }
@@ -59,6 +62,16 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
           }))
 
         val solutions = Queue[Exp]()
+        def filterSolutions(in: Value, out: Value) {
+          solutions.synchronized {
+            log("[Interact] Dequeued %d incorrect solutions, %d left".format(solutions.dequeueAll { program =>
+              val actual = Semantics.eval(program)(in)
+              val correct = actual == out
+              //                      println("[Solver] "+(if (correct) "passed" else "dropped (" + Semantics.toString(actual) + ")") + ": " + program.toString())
+              !correct
+            }.size, solutions.size))
+          }
+        }
 
         val solverPollingThread = future {
           while (solver.nextSolution() match {
@@ -104,20 +117,17 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
                   log("[Interact] Mismatch for input " + Semantics.toString(in) + ", should result in " + Semantics.toString(out))
                   problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ + (in -> out) })
                   solver.notifyNewData(Map(in -> out))
-                  solutions.synchronized {
-                    log("[Interact] Dequeued %d incorrect solutions, %d left".format(solutions.dequeueAll { program =>
-                      val actual = Semantics.eval(program)(in)
-                      val correct = actual == out
-                      //                      println("[Solver] "+(if (correct) "passed" else "dropped (" + Semantics.toString(actual) + ")") + ": " + program.toString())
-                      !correct
-                    }.size, solutions.size))
-                  }
+                  filterSolutions(in, out)
               }
             case None =>
               log("[Interact] No guesses in queue, sending eval.")
               val newResults = downloadNextEvalResults()
               problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ ++ newResults })
               solver.notifyNewData(newResults.toMap)
+              newResults.foreach {
+                case (in, out) =>
+                  filterSolutions(in, out)
+              }
           }
         }
         killSolver()

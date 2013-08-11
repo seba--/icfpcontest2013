@@ -1,14 +1,8 @@
 package frame
 
-import server.api.LocalServer
-import datacollection.TrainingProblemStore
 import client.api.ServerFacade
-import client.api.Problem
-import solver.solvers.BruteForceSizeFilteredSolver
 import server.api.IcfpcServer
-import scala.collection.Iterator
-import datacollection.BotApp
-import server.api.ProblemResponse
+import solver.solvers.BruteForceSizeFilteredSolver
 
 object LiveRunner extends App {
   // solve actual problems
@@ -16,7 +10,7 @@ object LiveRunner extends App {
 
   println("fetching open problems from server")
   val allMatchingProblems = server.myProblems.filter { problem =>
-    problem.size <= 8 && !problem.operators.contains(lang.Abstract.Operator.Bonus) && problem.solved != Some(true) && problem.timeLeft != Some(0)
+    problem.size <= 10 && !problem.operators.contains(lang.Abstract.Operator.Bonus) && problem.solved != Some(true) && problem.timeLeft != Some(0)
   }
   println("total matching problems left: "+allMatchingProblems.size)
 
