@@ -9,9 +9,9 @@ import lang.Metadata._
 
 object LinearMutator extends Mutator {
 
-  var specs: ProblemSpec = null
+  var ops: List[Operator] = List()
 
-  def init(spec: ProblemSpec): Unit = { specs = spec }
+  def init(spec: ProblemSpec): Unit = { ops = spec.operators.filterNot((o) => o == Operator.Bonus) }
 
   def notifyNewData(data: Map[Long, Long]): Unit = {}
 
@@ -27,7 +27,7 @@ object LinearMutator extends Mutator {
     result match {
       case Left(e) => Some(e)
       case Right(true) => {
-        val newExp = MutatorUtils.getNextMinimalExpression(e, specs.operators)
+        val newExp = MutatorUtils.getNextMinimalExpression(e, ops)
         if (newExp.isEmpty)
           None
         else {
@@ -56,7 +56,7 @@ object LinearMutator extends Mutator {
               ifExp.cond = e
               Left(ifExp)
             case Right(true) => {
-              val newExp = MutatorUtils.getNextMinimalExpression(ifExp.cond, specs.operators)
+              val newExp = MutatorUtils.getNextMinimalExpression(ifExp.cond, ops)
               if (newExp.isEmpty)
                 stepInto(ifExp.yes) match {
                   case None => stepInto(ifExp.no) match {
@@ -86,7 +86,7 @@ object LinearMutator extends Mutator {
                   ifExp.yes = e
                   Left(ifExp)
                 case Right(true) => {
-                  val newExp = MutatorUtils.getNextMinimalExpression(ifExp.yes, specs.operators)
+                  val newExp = MutatorUtils.getNextMinimalExpression(ifExp.yes, ops)
                   if (newExp.isEmpty)
                     stepInto(ifExp.no) match {
                       case None => Right(true)
@@ -109,7 +109,7 @@ object LinearMutator extends Mutator {
                       ifExp.no = e
                       Left(ifExp)
                     case Right(true) => {
-                      val newExp = MutatorUtils.getNextMinimalExpression(ifExp.no, specs.operators)
+                      val newExp = MutatorUtils.getNextMinimalExpression(ifExp.no, ops)
                       if (newExp.isEmpty)
                         Right(true)
                       else {
@@ -130,7 +130,7 @@ object LinearMutator extends Mutator {
               fold.over = e
               Left(fold)
             case Right(true) => {
-              val newExp = MutatorUtils.getNextMinimalExpression(fold.over, specs.operators)
+              val newExp = MutatorUtils.getNextMinimalExpression(fold.over, ops)
               if (newExp.isEmpty)
                 stepInto(fold.init) match {
                   case None => stepInto(fold.body) match {
@@ -160,7 +160,7 @@ object LinearMutator extends Mutator {
                   fold.init = e
                   Left(fold)
                 case Right(true) => {
-                  val newExp = MutatorUtils.getNextMinimalExpression(fold.init, specs.operators)
+                  val newExp = MutatorUtils.getNextMinimalExpression(fold.init, ops)
                   if (newExp.isEmpty)
                     stepInto(fold.body) match {
                       case None => Right(true)
@@ -183,7 +183,7 @@ object LinearMutator extends Mutator {
                       fold.body = e
                       Left(fold)
                     case Right(true) => {
-                      val newExp = MutatorUtils.getNextMinimalExpression(fold.body, specs.operators)
+                      val newExp = MutatorUtils.getNextMinimalExpression(fold.body, ops)
                       if (newExp.isEmpty)
                         Right(true)
                       else {
@@ -204,7 +204,7 @@ object LinearMutator extends Mutator {
               uExp.e = e
               Left(uExp)
             case Right(true) => {
-              val newExp = MutatorUtils.getNextMinimalExpression(uExp.e, specs.operators)
+              val newExp = MutatorUtils.getNextMinimalExpression(uExp.e, ops)
               if (newExp.isEmpty)
                 Right(true)
               else {
@@ -222,7 +222,7 @@ object LinearMutator extends Mutator {
               bExp.e1 = e
               Left(bExp)
             case Right(true) => {
-              val newExp = MutatorUtils.getNextMinimalExpression(bExp.e1, specs.operators)
+              val newExp = MutatorUtils.getNextMinimalExpression(bExp.e1, ops)
               if (newExp.isEmpty)
                 stepInto(bExp.e2) match {
                   case None => Right(true)
@@ -244,7 +244,7 @@ object LinearMutator extends Mutator {
                   bExp.e2 = e
                   Left(bExp)
                 case Right(true) => {
-                  val newExp = MutatorUtils.getNextMinimalExpression(bExp.e2, specs.operators)
+                  val newExp = MutatorUtils.getNextMinimalExpression(bExp.e2, ops)
                   if (newExp.isEmpty)
                     Right(true)
                   else {
@@ -281,7 +281,7 @@ object LinearMutator extends Mutator {
       case One() => Some(MainVar())
       case MainVar() => Some(FoldAcc())
       case FoldAcc() => Some(FoldNext())
-      case FoldNext() => Some(MutatorUtils.getMinimalExpressionForOperator(specs.operators(0)))
+      case FoldNext() => Some(MutatorUtils.getMinimalExpressionForOperator(ops(0)))
       case ifExp @ IfZero(_, _, _) => {
         val newCond = stepInto(ifExp.cond)
         if (newCond.isDefined) {
@@ -301,7 +301,7 @@ object LinearMutator extends Mutator {
               ifExp.no = newElse.get
               Some(ifExp)
             } else
-              MutatorUtils.getNextMinimalExpression(ifExp, specs.operators)
+              MutatorUtils.getNextMinimalExpression(ifExp, ops)
           }
         }
       }
@@ -311,7 +311,7 @@ object LinearMutator extends Mutator {
           uExp.e = newSub.get
           Some(uExp)
         } else
-          MutatorUtils.getNextMinimalExpression(uExp, specs.operators)
+          MutatorUtils.getNextMinimalExpression(uExp, ops)
       }
       case bExp @ BApp(_, _, _) => {
         val newLeft = stepInto(bExp.e1)
@@ -325,7 +325,7 @@ object LinearMutator extends Mutator {
             bExp.e2 = newRight.get
             Some(bExp)
           } else
-            MutatorUtils.getNextMinimalExpression(bExp, specs.operators)
+            MutatorUtils.getNextMinimalExpression(bExp, ops)
         }
       }
       case fold @ Fold(_, _, _) => {
@@ -347,7 +347,7 @@ object LinearMutator extends Mutator {
               fold.body = newBody.get
               Some(fold)
             } else
-              MutatorUtils.getNextMinimalExpression(fold, specs.operators)
+              MutatorUtils.getNextMinimalExpression(fold, ops)
           }
         }
       }
