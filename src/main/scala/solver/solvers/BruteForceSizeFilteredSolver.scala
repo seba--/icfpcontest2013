@@ -4,7 +4,7 @@ import solver.Solver
 import solver.ProblemSpec
 import solver.Strategy
 import solver.strategies.BruteForceInitialDataStrategy
-import solver.mutators.LinearMutator
+import solver.mutators._
 import solver.filter._
 import lang.Abstract._
 import solver.fitness.ConstantFitness
@@ -24,14 +24,13 @@ class BruteForceSizeFilteredSolver extends Solver {
     val filters = List(
       // STEP_OVER-Filter
       new SizeFilter, // OVER
+      new ShortcutShiftFilter, //OVER
       // both-STEP-Filter (at most one)
-      // STEP_INTO-Filter
-
       new ValidFoldFilter, //both
-      new ConstantFoldingFilter, //INTO
-      new ShortcutShiftFilter, //INTO
-      new IdentityOpFilter, //INTO
+      // STEP_INTO-Filter
       new TFoldConditionFilter, //both
+      new ConstantFoldingFilter, //INTO
+      new IdentityOpFilter, //INTO
       //new BinaryComparisonFilter, //INTO
       new EvalFilter //INTO
       )

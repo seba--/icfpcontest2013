@@ -14,7 +14,7 @@ class BruteForceInitialDataStrategy extends Strategy {
   var isInterrupted = false
   var current: Exp = Box()
   
-  def notifyNewData(delta: Map[Long, Long]) {
+  def selfNotification(delta: Map[Long, Long]) {
     // reset: this solver requires full initial data
   }
 
