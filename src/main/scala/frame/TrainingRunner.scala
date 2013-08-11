@@ -13,9 +13,9 @@ object TrainingRunner extends App {
     def hasNext = true
     def next = {
       BotApp.sleep(4)
-      server.train(WithTFold, 16)
+      server.train(DontCare, 12)
     }
   })
-  
+
   worker(new BruteForceSizeFilteredSolver)
 }
