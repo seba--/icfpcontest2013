@@ -123,7 +123,7 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
                   if (wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
               }
             case None =>
-              log("[Interact] No guesses in queue, sending eval.")
+              log("[Interact] No guesses in queue, sending eval. (%.2f seconds left)".format(timeLeft/1000.0))
               val newResults = downloadNextEvalResults()
               problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ ++ newResults })
               solver.notifyNewData(newResults.toMap)

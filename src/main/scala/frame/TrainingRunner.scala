@@ -5,6 +5,7 @@ import client.api._
 import datacollection.BotApp
 import solver.solvers.BruteForceSizeFilteredSolver
 import server.api.IcfpcServer
+import solver.solvers.PartialSolver
 
 object TrainingRunner extends App {
   val server = new ServerFacade(IcfpcServer)
@@ -13,9 +14,9 @@ object TrainingRunner extends App {
     def hasNext = true
     def next = {
       BotApp.sleep(4)
-      server.train(DontCare, 12)
+      server.train(NoFold, 20)
     }
   })
 
-  worker(new BruteForceSizeFilteredSolver)
+  worker(new PartialSolver)
 }

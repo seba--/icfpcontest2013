@@ -1,0 +1,1 @@
+{ "id" : "GT1mjAKuVEmdpFAfv8nuEWN1", "size": 20, "operators": ["and", "if0", "not", "or", "plus", "shl1", "shr1"], "challenge":"(lambda (main_var) ((shr1 (shl1 (not (if0 main_var (or (if0 (or (and (plus (shl1 main_var) 0) main_var) main_var) 1 0) 0) main_var))))))" }
