@@ -23,5 +23,5 @@ class CompositeFilter(filters: List[Filter]) extends Filter {
 	// - the last (half of the) Filters can only return STEP_INTO (or OK)
 	//if using 'or' then sort the groups in ascending runtime to get an optimal overall runtime
 	def filter(e : Exp): Int =
-	  filters.foldLeft(OK)((curr, next) => max(curr, next.filter, e))
+	  filters.foldLeft(OK)((curr, next) => or(curr, next.filter, e))
 }
