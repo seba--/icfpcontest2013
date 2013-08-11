@@ -10,7 +10,7 @@ import solver.ProblemSpec
 import solver.Filter
 import solver.Fitness
 import scala.concurrent._
-import ExecutionContext.Implicits.global
+import solver.MyExecutionContext._
 import scala.collection.mutable.Queue
 import lang.Concrete
 import solver.strategies.BruteForceInitialDataStrategy

@@ -11,10 +11,10 @@ object LiveRunner extends App {
   val server = new ServerFacade(IcfpcServer)
 
   println("fetching open problems from server")
-  val size = 11
+//  val size = 12
   val allMatchingProblems = server.myProblems.filter { problem =>
-    (problem.size <= size || (problem.size <= size + 4 && problem.operators.contains(lang.Abstract.Operator.TFold))) &&
-      !problem.operators.contains(lang.Abstract.Operator.Bonus) &&
+//    (problem.size <= size || (problem.size <= size + 4 && problem.operators.contains(lang.Abstract.Operator.TFold))) &&
+//      !problem.operators.contains(lang.Abstract.Operator.Bonus) &&
       problem.solved != Some(true) && problem.timeLeft != Some(0)
   }.toArray
   println("total matching problems left: " + allMatchingProblems.size)

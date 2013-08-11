@@ -7,7 +7,7 @@ import solver.ProblemSpec
 import lang.Semantics
 import datacollection.EvalDownload
 import scala.concurrent._
-import ExecutionContext.Implicits.global
+import solver.MyExecutionContext._
 import datacollection.BotApp
 import lang.Abstract.Exp
 import lang.Concrete
