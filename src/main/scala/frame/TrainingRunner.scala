@@ -15,7 +15,7 @@ object TrainingRunner extends App {
     def hasNext = true
     def next = {
       BotApp.sleep(4)
-      server.train(10)
+      server.train(11)
     }
   })
   

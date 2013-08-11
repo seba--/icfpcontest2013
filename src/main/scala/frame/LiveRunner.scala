@@ -10,7 +10,7 @@ object LiveRunner extends App {
 
   println("fetching open problems from server")
   val allMatchingProblems = server.myProblems.filter { problem =>
-    problem.size <= 10 && !problem.operators.contains(lang.Abstract.Operator.Bonus) && problem.solved != Some(true) && problem.timeLeft != Some(0)
+    problem.size <= 111 && !problem.operators.contains(lang.Abstract.Operator.Bonus) && problem.solved != Some(true) && problem.timeLeft != Some(0)
   }
   println("total matching problems left: "+allMatchingProblems.size)
 
