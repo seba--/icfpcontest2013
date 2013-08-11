@@ -18,6 +18,7 @@ class BinaryComparisonFilter extends Filter {
       case _ => FilterV.OK
     }
   }
+  
   def compare(e1: Exp, e2: Exp): Int = {
     val diff = valueOf(e1) - valueOf(e2)
     if (diff != 0)
