@@ -5,6 +5,7 @@ import client.api.Status
 import lang.Semantics
 import client.api.Problem
 import lang.Concrete
+import client.api.OperatorRestriction
 
 class LocalServer(store: TrainingProblemStore) extends Server {
   private val iter = store.allProblems.iterator
@@ -28,7 +29,7 @@ class LocalServer(store: TrainingProblemStore) extends Server {
   override def status(): Status = {
     throw new UnsupportedOperationException
   }
-  override def train(size: Int = 0) : ProblemResponse = {
+  override def train(trainingRequest: TrainingRequest): ProblemResponse = {
     iter.next
   }
   override def myProblems() = {

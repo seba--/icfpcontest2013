@@ -1,12 +1,10 @@
 package frame
 
 import scala.collection.Iterator
-
-import client.api.Problem
-import client.api.ServerFacade
+import client.api._
 import datacollection.BotApp
-import server.api.IcfpcServer
 import solver.solvers.BruteForceSizeFilteredSolver
+import server.api.IcfpcServer
 
 object TrainingRunner extends App {
   val server = new ServerFacade(IcfpcServer)
@@ -15,7 +13,7 @@ object TrainingRunner extends App {
     def hasNext = true
     def next = {
       BotApp.sleep(4)
-      server.train(10)
+      server.train(WithTFold, 8)
     }
   })
   

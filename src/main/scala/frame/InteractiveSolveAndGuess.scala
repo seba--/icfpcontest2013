@@ -32,7 +32,7 @@ object InteractiveSolveAndGuess {
     var numbers = initial
     while (numbers.size < size) {
       val next = random.nextLong()
-      if(!numbers.contains(next)) {
+      if (!numbers.contains(next)) {
         numbers = numbers :+ next
       }
     }
@@ -62,14 +62,14 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
           }))
 
         val solutions = Queue[Exp]()
-        def filterSolutions(in: Value, out: Value) {
+        def filterSolutions(in: Value, out: Value) = {
           solutions.synchronized {
-            log("[Interact] Dequeued %d incorrect solutions, %d left".format(solutions.dequeueAll { program =>
+            (solutions.dequeueAll { program =>
               val actual = Semantics.eval(program)(in)
               val correct = actual == out
               //                      println("[Solver] "+(if (correct) "passed" else "dropped (" + Semantics.toString(actual) + ")") + ": " + program.toString())
               !correct
-            }.size, solutions.size))
+            }.size, solutions.size)
           }
         }
 
@@ -111,29 +111,33 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
                   problem = problem.copy(solved = Some(true))
                   killSolver()
                 case Error(message) =>
-                  log("[Interact] Error: " + message)
-                //TODO do something
+                  log("[Interact] Discarding guess due to error: " + message)
                 case Mismatch(in, out, _) =>
                   log("[Interact] Mismatch for input " + Semantics.toString(in) + ", should result in " + Semantics.toString(out))
                   problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ + (in -> out) })
                   solver.notifyNewData(Map(in -> out))
-                  filterSolutions(in, out)
+                  val (wrong, left) = filterSolutions(in, out)
+                  if(wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
               }
             case None =>
               log("[Interact] No guesses in queue, sending eval.")
               val newResults = downloadNextEvalResults()
               problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ ++ newResults })
               solver.notifyNewData(newResults.toMap)
-              newResults.foreach {
-                case (in, out) =>
-                  filterSolutions(in, out)
+              val(wrong, left) = newResults.foldLeft((0, 0)) {
+                case ((wrong, left), (in, out)) =>
+                  val (newWrong, newLeft) = filterSolutions(in, out)
+                  (wrong + newWrong, newLeft)
               }
+              if(wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
           }
         }
         killSolver()
+        if(timeLeft() < 0) log("Problem timed out.")
         // TODO store problem
       }
     }
+    log("[Interact] No more problems, terminating.")
   }
 }
 
