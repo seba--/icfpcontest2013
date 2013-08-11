@@ -1,1 +1,0 @@
-{"id":"SpHEsKdE660usXYyYkBVKGx4", "size":10, "operators":["and", "if0", "not", "shr1", "shr4"], "challenge":"(lambda (main_var) (if0 (and (shr1 (shr4 (not main_var))) 1) 0 main_var))"}
