@@ -25,11 +25,11 @@ class BinaryComparisonFilter extends Filter {
     else {
       e1 match {
         case b @ Box() => 0
-        case Zero() => 0
-        case One() => 0
-        case MainVar() => 0
-        case FoldAcc() => 0
-        case FoldNext() => 0
+        case Zero => 0
+        case One => 0
+        case MainVar => 0
+        case FoldAcc => 0
+        case FoldNext => 0
         case fold1 @ lang.Abstract.Fold(_, _, _) =>
           e2 match {
             case fold2 @ lang.Abstract.Fold(_, _, _) =>
@@ -76,11 +76,11 @@ class BinaryComparisonFilter extends Filter {
   def valueOf(e: Exp): Int = {
     e match {
       case b @ Box() => if (b.isEmpty) 0 else valueOf(e)
-      case Zero() => 1
-      case One() => 2
-      case MainVar() => 3
-      case FoldAcc() => 4
-      case FoldNext() => 5
+      case Zero => 1
+      case One => 2
+      case MainVar => 3
+      case FoldAcc => 4
+      case FoldNext => 5
       case BApp(And, _, _) => 6
       case lang.Abstract.Fold(_, _, _) => 7
       case IfZero(_, _, _) => 8

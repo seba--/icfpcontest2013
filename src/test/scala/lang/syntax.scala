@@ -14,7 +14,7 @@ class ParserSuite extends FunSuite {
 
   test("id function") {
     val res = parse("(lambda (x) x)")
-    assert(res === MainVar())
+    assert(res === MainVar)
   }
 
 

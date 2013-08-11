@@ -42,17 +42,17 @@ object Semantics {
 
     def eval(e: Exp): Value = e match {
       case b @ Box() => if (b.isEmpty) throw new EmptyBox() else eval(b.e)
-      case Zero() => 0L
-      case One() => 1L
-      case MainVar() => in
-      case FoldNext() =>
+      case Zero => 0L
+      case One => 1L
+      case MainVar => in
+      case FoldNext =>
         if (foldNext.isDefined)
           foldNext.get
-        else throw UnboundVariable(FoldNext().toString)
-      case FoldAcc() =>
+        else throw UnboundVariable(FoldNext.toString)
+      case FoldAcc =>
         if (foldAcc.isDefined)
           foldAcc.get
-        else throw UnboundVariable(FoldAcc().toString)
+        else throw UnboundVariable(FoldAcc.toString)
 
       case IfZero(cond, yes, no) => {
         val cval = eval(cond)

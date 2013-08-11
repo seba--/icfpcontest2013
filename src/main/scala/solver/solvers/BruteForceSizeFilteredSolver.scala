@@ -4,7 +4,7 @@ import solver.Solver
 import solver.ProblemSpec
 import solver.Strategy
 import solver.strategies.BruteForceInitialDataStrategy
-import solver.mutators.LinearMutator
+import solver.mutators._
 import solver.filter._
 import lang.Abstract._
 import solver.fitness.ConstantFitness
@@ -26,16 +26,15 @@ class BruteForceSizeFilteredSolver extends Solver {
       new SizeFilter, // OVER
       new ShortcutShiftFilter, //OVER
       // both-STEP-Filter (at most one)
-      // STEP_INTO-Filter
-
       new ValidFoldFilter, //both
+      // STEP_INTO-Filter
+      new TFoldConditionFilter, //both
       new ConstantFoldingFilter, //INTO
       new IdentityOpFilter, //INTO
-      new TFoldConditionFilter, //both
       //new BinaryComparisonFilter, //INTO
       new EvalFilter //INTO
       )
-    strategy.init(problemSpec, LinearMutator, new CompositeFilter(filters), ConstantFitness(1.0))
+    strategy.init(problemSpec, new TFoldMutatorDecorator(LinearMutator), new CompositeFilter(filters), ConstantFitness(1.0))
   }
 
   def notifyNewData(delta: Map[Long, Long]) {

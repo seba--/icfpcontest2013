@@ -17,11 +17,11 @@ object Abstract {
   def printProgram(e: Exp) = "(lambda (" + "main_var" + ") " + e + ")" 
   
   abstract class Exp
-  case class Zero() extends Exp { override def toString = "0" }
-  case class One() extends Exp { override def toString = "1" }
-  case class MainVar() extends Exp { override def toString = "main_var" }
-  case class FoldNext() extends Exp { override def toString = "fold_next" }
-  case class FoldAcc() extends Exp { override def toString = "fold_acc" }
+  case object Zero extends Exp { override def toString = "0" }
+  case object One extends Exp { override def toString = "1" }
+  case object MainVar extends Exp { override def toString = "main_var" }
+  case object FoldNext extends Exp { override def toString = "fold_next" }
+  case object FoldAcc extends Exp { override def toString = "fold_acc" }
   case class IfZero(var cond: Exp, var yes: Exp, var no: Exp) extends Exp { override def toString = "(if0 " + cond + " " + yes + " " + no + ")" }
   case class Fold(var over: Exp, var init: Exp, var body: Exp) extends Exp { override def toString = "(fold " + over+ " " + init + " " + "(lambda (" + "fold_next" + " " + "fold_acc" + ") " + body + ")" + ")" }
   case class UApp(var op: Operator, var e: Exp) extends Exp { override def toString = "(" + op.toString.toLowerCase + " " + e + ")" }
@@ -36,11 +36,11 @@ object Abstract {
   
   def getOperator(e: Exp) : Option[Operator] = e match {
     case b@Box() => if (b.isEmpty) None else getOperator(b.e)
-    case Zero() => None
-    case One() => None
-    case MainVar() => None
-    case FoldNext() => None
-    case FoldAcc() => None
+    case Zero => None
+    case One => None
+    case MainVar => None
+    case FoldNext => None
+    case FoldAcc => None
     case IfZero(cond, yes, no) => Some(Operator.If0)
     case Fold(over, init, body) => Some(Operator.Fold)
     case UApp(op, e) => Some(op)
@@ -88,8 +88,8 @@ object Abstract {
 //      mainVar: Abstract.Id,
 //      foldNextVar: Abstract.Id = null, 
 //      foldAccVar: Abstract.Id = null): Exp = e match {
-//    case Abstract.Zero() => DoubleLinkedList(Zero)
-//    case Abstract.One() => DoubleLinkedList(One)
+//    case Abstract.Zero => DoubleLinkedList(Zero)
+//    case Abstract.One => DoubleLinkedList(One)
 //    case Abstract.Var(v) if foldNextVar != null && v == foldNextVar => DoubleLinkedList(FoldNext)
 //    case Abstract.Var(v) if foldAccVar != null && v == foldAccVar => DoubleLinkedList(FoldAcc)
 //    case Abstract.Var(v) if v == mainVar => DoubleLinkedList(MainVar)
@@ -133,9 +133,9 @@ object Abstract {
 //  
 //  def makeStructural(e: Exp): (Abstract.Exp, Exp) = 
 //    if (e.head == Zero)
-//      (Abstract.Zero(), e.next)
+//      (Abstract.Zero, e.next)
 //    else if (e.head == One)
-//      (Abstract.One(), e.next)
+//      (Abstract.One, e.next)
 //    else if (e.head == MainVar)
 //      (Abstract.Var("main_var"), e.next)
 //    else if (e.head == FoldNext)
@@ -232,17 +232,17 @@ object Concrete {
   
   def parseExp(s: String, mainVar: String, foldNext: String, foldVar: String): Result[Exp] =
     if (s.startsWith("0"))
-      (Zero(), s.substring(1))
+      (Zero, s.substring(1))
     else if (s.startsWith("1"))
-      (One(), s.substring(1))
+      (One, s.substring(1))
     else if (s.size > 0 && (s(0) >= 'a' && s(0) <= 'z')) {
       val (x, s2) = parseId(s)
       if (x == foldNext)
-        (FoldNext(), s2)
+        (FoldNext, s2)
       else if (x == foldVar)
-        (FoldAcc(), s2)
+        (FoldAcc, s2)
       else if (x == mainVar)
-        (MainVar(), s2)
+        (MainVar, s2)
       else throw ParseException("Unbound variable " + x, s2)
     }
     else if (s.size > 0 && s(0) == '?') {

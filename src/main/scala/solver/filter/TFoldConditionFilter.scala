@@ -33,14 +33,14 @@ class TFoldConditionFilter extends Filter {
 
   def filter(e: Exp): Int = e match {
     case Fold(over, init, body) if isTFold =>
-      if (over == MainVar() && init == Zero() && !containsMainVar(body))
+      if (over == MainVar && init == Zero && !containsMainVar(body))
         FilterV.OK
       else
         FilterV.STEP_INTO
     case _ if isTFold => FilterV.STEP_OVER
 
     case Fold(over, init, body) if !isTFold =>
-      if (over == MainVar() && init == Zero() && !containsMainVar(body))
+      if (over == MainVar && init == Zero && !containsMainVar(body))
         FilterV.STEP_INTO
       else
         FilterV.OK
@@ -48,7 +48,7 @@ class TFoldConditionFilter extends Filter {
   }
 
   def filterFirstFold(e: Exp): Boolean = e match {
-    case Fold(MainVar(), Zero(), _) => false
+    case Fold(MainVar, Zero, _) => false
     case _ => true
   }
 
@@ -63,7 +63,7 @@ class TFoldConditionFilter extends Filter {
       containsMainVar(e1) && containsMainVar(e2)
     case b @ Box() =>
       if (b.isEmpty) false else containsMainVar(b.e)
-    case MainVar() =>
+    case MainVar =>
       true
     case _ =>
       false
