@@ -11,6 +11,7 @@ import lang.Metadata
 import solver.FilterV
 
 class BruteForceInitialDataStrategy extends Strategy {
+  var isInterrupted = false
   var current: Exp = Box()
   
   def notifyNewData(delta: Map[Long, Long]) {
@@ -22,7 +23,7 @@ class BruteForceInitialDataStrategy extends Strategy {
   def nextSolution(): Option[Exp] = {
     var next = mutator.stepInto(current)
     while (true) {
-      if (!next.isDefined)
+      if (isInterrupted || !next.isDefined)
         return None
 
       current = next.get
@@ -37,5 +38,8 @@ class BruteForceInitialDataStrategy extends Strategy {
       }
     }
     next
+  }
+  def interrupt() {
+    isInterrupted = true
   }
 }

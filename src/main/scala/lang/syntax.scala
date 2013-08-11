@@ -192,7 +192,7 @@ object Concrete {
   
   import Abstract._
   
-  case class ParseException(msg: String, rest: String) extends Exception
+  case class ParseException(msg: String, rest: String) extends Exception(msg)
   
   type Result[A] = (A, String)
   

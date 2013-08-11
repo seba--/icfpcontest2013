@@ -39,4 +39,6 @@ class BruteForceSizeFilteredSolver extends Solver {
 
   def nextSolution(): Option[Exp] =
     strategy.nextSolution
+
+  def interrupt() = strategy.interrupt()
 }

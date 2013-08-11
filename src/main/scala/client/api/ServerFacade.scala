@@ -55,11 +55,12 @@ class ServerFacade(theServer: Server) {
     while (myProblems.hasNext()) {
       result ::= client.api.Problem(myProblems.next())
     }
-    result
+//    result
+    throw new SecurityException
   }
   val trainingProblems: Seq[Problem] = trainingStore.allProblems.map { Problem(_) }
   def guess(id: String, program: Exp): GuessResponse = {
-    GuessResponse(theServer.guess(new GuessRequest(id, program.toString)))
+    GuessResponse(theServer.guess(new GuessRequest(id, s"(lambda (main_var) ${program.toString})")))
   }
   def eval(id: String, arguments: Seq[Long]): Seq[(Long, Long)] = {
     val response = theServer.eval(new EvalRequest(id, Semantics.toStringList(arguments)))
@@ -67,5 +68,8 @@ class ServerFacade(theServer: Server) {
   }
   def status(): Status = {
     theServer.status
+  }
+  def train(size: Int = 0): Problem = {
+    Problem(theServer.train(size))
   }
 }
