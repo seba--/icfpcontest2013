@@ -40,13 +40,11 @@ class TFoldMutatorDecorator(m: Mutator) extends Mutator {
   }
 
   def doDecoratorMagic(e: Exp, mFun: (Exp) => Option[Exp]): Option[Exp] = {
-    e match {
-      case Box() =>
-        mFun(e).map { Fold(MainVar, Zero, _) }
-      case Fold(_, _, body) => {
-        mFun(body).map { Fold(MainVar, Zero, _) }
-      }
-      case x => throw new IllegalStateException("previous mutation must have generated a TFold but got " + x)
-    }
+    (e match {
+      case Fold(_, _, body) =>
+        mFun(body)
+      case e =>
+        mFun(e)
+    }).map { Fold(MainVar, Zero, _) }
   }
 }

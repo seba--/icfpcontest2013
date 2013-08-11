@@ -94,7 +94,7 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
           if (!solverPollingThread.isCompleted) {
             log("[Interact] Killing solver...")
             solver.interrupt()
-            Await.result(solverPollingThread, Duration(100, MILLISECONDS))
+            Await.ready(solverPollingThread, Duration(100, MILLISECONDS))
           }
         }
 
@@ -123,7 +123,7 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
                   if (wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
               }
             case None =>
-              log("[Interact] No guesses in queue, sending eval. (%.2f seconds left)".format(timeLeft/1000.0))
+              log("[Interact] No guesses in queue, sending eval. (%.2f seconds left)".format(timeLeft / 1000.0))
               val newResults = downloadNextEvalResults()
               problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ ++ newResults })
               solver.notifyNewData(newResults.toMap)
@@ -138,14 +138,17 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
         killSolver()
         if (problem.solved != Some(true)) {
           log("[Interact] problem aborted. Reasons:")
-          solverPollingThread.value.get match {
-            case Failure(e) =>
-              log("[Interact] Solver crashed!")
-              e.printStackTrace()
-            case Success(_) =>
-              log("[Interact] Solver terminated with no further solutions.")
+          if (timeLeft() < 0) {
+            log("[Interact] Problem timed out.")
+          } else {
+            solverPollingThread.value.get match {
+              case Failure(e) =>
+                log("[Interact] Solver crashed!")
+                e.printStackTrace()
+              case Success(_) =>
+                log("[Interact] Solver terminated with no further solutions.")
+            }
           }
-          if (timeLeft() < 0) log("[Interact] Problem timed out.")
         }
         // TODO store problem
       }

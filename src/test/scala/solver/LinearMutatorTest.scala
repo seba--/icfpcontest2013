@@ -9,10 +9,11 @@ import lang.Metadata
 
 class LinearMutatorTest1 extends FunSuite {
   test("gernerate Not-Programs") {
-    LinearMutator.init(new ProblemSpec("", 0, List(Not, And), null))
+    val mutator = new LinearMutator
+    mutator.init(new ProblemSpec("", 0, List(Not, And), null))
     var actualProgram : Exp = Box()
     for (_ <- 0 to 100) {
-      actualProgram = LinearMutator.stepInto(actualProgram).get
+      actualProgram = mutator.stepInto(actualProgram).get
       // should be only "not"s
       println(actualProgram)
     }
@@ -21,13 +22,14 @@ class LinearMutatorTest1 extends FunSuite {
 
 class LinearMutatorTest2 extends FunSuite {
   test("gernerate Not/And-Programs") {
-    LinearMutator.init(new ProblemSpec("", 0, List(Not, And), null))
+    val mutator = new LinearMutator
+    mutator.init(new ProblemSpec("", 0, List(Not, And), null))
     var actualProgram : Exp = Box()
     for (_ <- 0 to 100) {
       if (Metadata.size(actualProgram) > 6)
-        actualProgram = LinearMutator.stepOver(actualProgram).get
+        actualProgram = mutator.stepOver(actualProgram).get
       else
-        actualProgram = LinearMutator.stepInto(actualProgram).get
+        actualProgram = mutator.stepInto(actualProgram).get
       // should be only "not"s
       println(actualProgram)
     }

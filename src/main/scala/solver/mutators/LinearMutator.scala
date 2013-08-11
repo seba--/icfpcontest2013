@@ -7,7 +7,7 @@ import solver.Mutator
 import solver.ProblemSpec
 import lang.Metadata._
 
-object LinearMutator extends Mutator {
+class LinearMutator extends Mutator {
 
   var ops: List[Operator] = List()
 

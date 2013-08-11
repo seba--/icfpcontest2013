@@ -4,6 +4,10 @@ import lang.Abstract._
 import lang.Semantics.Value
 import client.api.Problem
 
+object Canceled extends Exception {
+  def apply() = throw this
+}
+
 /**
  * An independent solver for a problem specification.
  */

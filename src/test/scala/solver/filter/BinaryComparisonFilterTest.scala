@@ -69,9 +69,10 @@ class BinaryComparisonFilterTest extends FilterTest {
     assertDenies("(lambda (x) (or (or (not x) (xor 1 0)) (or (not x) x)))")
   }
 
+  val mutator = new LinearMutator
   test("Exps mutate to strictly greater ones") {
     val filter = new BinaryComparisonFilter()
-    LinearMutator.init(new ProblemSpec("", 0, List(And, Not), null))
+    mutator.init(new ProblemSpec("", 0, List(And, Not), null))
     var small: Exp = Box()
     var big: Exp = Box()
     big = mutate(big).get
@@ -94,7 +95,7 @@ class BinaryComparisonFilterTest extends FilterTest {
 
   def mutate(e: Exp): Option[Exp] = {
     val maxSize = 4
-    val mutated = LinearMutator.stepInto(e)
+    val mutated = mutator.stepInto(e)
     if (mutated.isEmpty || size(mutated.get) <= maxSize)
       mutated
     else
@@ -102,7 +103,7 @@ class BinaryComparisonFilterTest extends FilterTest {
   }
 
   def mutateOver(e: Exp, maxSize:Int): Option[Exp] = {
-    val mutated = LinearMutator.stepOver(e)
+    val mutated = mutator.stepOver(e)
     if (mutated.isEmpty || size(mutated.get) <= maxSize)
       mutated
     else

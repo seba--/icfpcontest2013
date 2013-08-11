@@ -58,11 +58,11 @@ class PartialSolver extends Solver {
 
     for (inputOutputTuple <- spec.data) {
       if (isInterrupted)
-        return None
+        solver.Canceled()
 
       if (!partitions.exists(fits(_, inputOutputTuple))) {
         if (!partitions.exists(tryFit(_, inputOutputTuple))) {
-          println("Creating new partition")
+//          println("Creating new partition")
           val partition = new Partition(Map(), Box())
           if (!tryFit(partition, inputOutputTuple))
             throw new IllegalStateException("Assumed to be unreachable")
@@ -71,13 +71,15 @@ class PartialSolver extends Solver {
       }
     }
 
-    println("Created " + partitions.size + " partitions that are able to fit all data")
+//    println("Created " + partitions.size + " partitions that are able to fit all data")
     return createExp(partitions, spec.data)
   }
 
   def createExp(partitions: List[Partition], unmatchedData: Map[Long, Long]): Option[Exp] = {
-    if (partitions.size == 1 || isInterrupted)
+    if (partitions.size == 1)
       return Some(partitions.head.solution)
+    if (isInterrupted)
+      solver.Canceled()
 
     for (partition <- partitions) {
       val condition = findCondition(partition, unmatchedData)
@@ -101,14 +103,14 @@ class PartialSolver extends Solver {
     matchNotInput.foreach(x => matchData = matchData + (x -> 1L))
     currentStrategy = createConditionStrategy(createSubProblem(matchData))
     if (isInterrupted)
-      return None
+      solver.Canceled()
     currentStrategy.nextSolution
   }
 
   def fits(partition: Partition, dataPoint: (Long, Long)): Boolean = {
     if (!partition.currentData.isEmpty && Semantics.eval(partition.solution)(dataPoint._1) == dataPoint._2) {
       partition.currentData = partition.currentData + dataPoint
-      println(String.format("%s fits partition: '%s'", dataPoint, partition.solution))
+//      println(String.format("%s fits partition: '%s'", dataPoint, partition.solution))
       return true
     }
     return false
@@ -118,17 +120,17 @@ class PartialSolver extends Solver {
     val data = partition.currentData + dataPoint
     currentStrategy = createStrategy(createSubProblem(data), partition.solution)
     if (isInterrupted)
-      return true
+      solver.Canceled()
 
     val currentSolution = currentStrategy.nextSolution
     if (currentSolution.isDefined) {
-      println(String.format("%s fits partition: \n\tPrevious \'%s' \n\tNew: \t'%s'",
-        dataPoint, partition.solution, currentSolution.get))
+//      println(String.format("%s fits partition: \n\tPrevious \'%s' \n\tNew: \t'%s'",
+//        dataPoint, partition.solution, currentSolution.get))
       partition.currentData = data
       partition.solution = currentSolution.get
       return true
     } else {
-      println(String.format("Cannot fit %s in solution %s", dataPoint, partition.solution))
+//      println(String.format("Cannot fit %s in solution %s", dataPoint, partition.solution))
       return false
     }
   }
@@ -140,14 +142,14 @@ class PartialSolver extends Solver {
   def createStrategy(spec: ProblemSpec, initial: Exp): Strategy = {
     val strategy = new BruteForceStartExpStrategy(initial)
     val filter = new CompositeFilter(defaultFilters ++ List(new EvalFilter))
-    strategy.init(spec, new TFoldMutatorDecorator(LinearMutator), filter, ConstantFitness(1.0))
+    strategy.init(spec, new LinearMutator, filter, ConstantFitness(1.0))
     return strategy
   }
 
   def createConditionStrategy(spec: ProblemSpec): Strategy = {
     val strategy = new BruteForceInitialDataStrategy
     val filter = new CompositeFilter(defaultFilters ++ List(new EvalNeqZeroFilter))
-    strategy.init(spec, LinearMutator, filter, ConstantFitness(1.0))
+    strategy.init(spec, new LinearMutator, filter, ConstantFitness(1.0))
     return strategy
   }
 
