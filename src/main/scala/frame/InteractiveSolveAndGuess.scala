@@ -94,14 +94,16 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
           if (!solverPollingThread.isCompleted) {
             log("[Interact] Killing solver...")
             solver.interrupt()
-            Await.ready(solverPollingThread, Duration(100, MILLISECONDS))
+            Await.ready(solverPollingThread, Duration(500, MILLISECONDS))
           }
         }
 
         def sholdContinue() = problem.solved != Some(true) && timeLeft() > 0 && (!solverPollingThread.isCompleted || !solutions.isEmpty)
 
+        var i = 0
         while (sholdContinue()) {
-          BotApp.sleep(4)
+          BotApp.sleep(1)
+          i = i + 1
 
           solutions.synchronized {
             if (solutions.isEmpty) None else Some(solutions.dequeue())
@@ -123,16 +125,21 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
                   if (wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
               }
             case None =>
-              log("[Interact] No guesses in queue, sending eval. (%.2f seconds left)".format(timeLeft / 1000.0))
-              val newResults = downloadNextEvalResults()
-              problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ ++ newResults })
-              solver.notifyNewData(newResults.toMap)
-              val (wrong, left) = newResults.foldLeft((0, 0)) {
-                case ((wrong, left), (in, out)) =>
-                  val (newWrong, newLeft) = filterSolutions(in, out)
-                  (wrong + newWrong, newLeft)
+              if (i > 12) {
+                log("[Interact] No guesses in queue, sending eval. (%.2f seconds left)".format(timeLeft / 1000.0))
+                i = 0
+                val newResults = downloadNextEvalResults()
+                problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ ++ newResults })
+                solver.notifyNewData(newResults.toMap)
+                val (wrong, left) = newResults.foldLeft((0, 0)) {
+                  case ((wrong, left), (in, out)) =>
+                    val (newWrong, newLeft) = filterSolutions(in, out)
+                    (wrong + newWrong, newLeft)
+                }
+                if (wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
+              } else {
+                log("[Interact] No guesses in queue, but still on Countdown... (%.2f seconds left)".format(timeLeft / 1000.0))
               }
-              if (wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
           }
         }
         killSolver()

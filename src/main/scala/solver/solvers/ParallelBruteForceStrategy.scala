@@ -1,6 +1,7 @@
 package solver.solvers
 
 import solver.Strategy
+import solver.Canceled
 import lang.Abstract.Exp
 import solver.Mutator
 import solver.mutators.TFoldMutatorDecorator
@@ -32,7 +33,7 @@ class TopExpressionRestriction(op: Operator) extends Filter {
       case e => test(e);
     }
   }
-  
+
   def test(e: Exp) = {
     if (Abstract.getOperator(e) == Some(op))
       OK
@@ -42,10 +43,13 @@ class TopExpressionRestriction(op: Operator) extends Filter {
   }
 }
 class ParallelBruteForceStrategy extends Strategy {
+  var interrupted = false
   var strategies: Map[Operator, Strategy] = _
   val processes: mutable.Set[Operator] = mutable.Set()
 
   def init(spec: ProblemSpec, mutator: Mutator, filter: Filter, fitness: Fitness) = {
+    interrupted = false
+
     processes.clear();
     processes ++= spec.operators.filter(op => op != Bonus && op != TFold)
     strategies = processes.map { operator =>
@@ -57,10 +61,10 @@ class ParallelBruteForceStrategy extends Strategy {
     strategies.foreach {
       case (operator, strategy) =>
         val process = future {
-//          BotApp.log("Starting sub-search for " + operator)
+          //          BotApp.log("Starting sub-search for " + operator)
           while (strategy.nextSolution() match {
             case Some(e) =>
-//              BotApp.log("Solution from strategy " + operator + ": " + e.toString)
+              //              BotApp.log("Solution from strategy " + operator + ": " + e.toString)
               val ec = Concrete.parse(s"(lambda (main_var) $e)")
               queue.synchronized {
                 queue += ec
@@ -76,8 +80,10 @@ class ParallelBruteForceStrategy extends Strategy {
               }
               false
           }) {}
-//          BotApp.log("Sub-search for " + operator + " terminated.")
+          //          BotApp.log("Sub-search for " + operator + " terminated.")
         }.onFailure {
+          case Canceled =>
+          // ignore
           case e: Exception =>
             BotApp.log("Sub-search for " + operator + " crashed!")
             e.printStackTrace()
@@ -98,12 +104,12 @@ class ParallelBruteForceStrategy extends Strategy {
 
   def nextSolution(): Option[Exp] = {
     queue.synchronized {
-      while (queue.isEmpty && !isDone) {
-        BotApp.log("Now waiting for solution..")
+      while (!interrupted && queue.isEmpty && !isDone) {
+        //        BotApp.log("Now waiting for solution..")
         queue.wait()
-        BotApp.log("Got notify.")
+        //        BotApp.log("Got notify.")
       }
-      if (queue.isEmpty) {
+      if (interrupted || queue.isEmpty) {
         None
       } else {
         Some(queue.dequeue)
@@ -112,6 +118,8 @@ class ParallelBruteForceStrategy extends Strategy {
   }
 
   def interrupt() {
+    interrupted = true
+    queue.synchronized { queue.notifyAll() }
     strategies.values.foreach(_.interrupt())
   }
 }

@@ -11,14 +11,14 @@ import solver.solvers.DispatchSolver
 object TrainingRunner extends App {
   val server = new ServerFacade(IcfpcServer)
 
-  val theSize = 9;
+  val theSize = 11;
 
   val worker = new InteractiveSolveAndGuess(server, new Iterator[Problem] {
     def hasNext = true
     def next = {
       BotApp.sleep(4)
       if (math.random < .75) {
-        server.train(WithTFold, theSize)
+        server.train(DontCare, theSize)
       } else {
         server.train(WithTFold, theSize + 4)
       }
