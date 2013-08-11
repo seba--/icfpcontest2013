@@ -102,7 +102,7 @@ class TrainingDataParserSuite extends FunSuite {
   test("training data") {
     TrainingProblemStore.default.allProblems.foreach { prob =>
       try {
-        parse(prob.challenge)
+        parse(prob.challenge.get)
       } catch {
         case ParseException(msg, str) =>
           println("FAILED " + prob.id)

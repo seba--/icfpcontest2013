@@ -18,5 +18,5 @@ case class ProblemSpec(
 }
 
 object ProblemSpec {
-  def apply(problem: Problem) = new ProblemSpec(problem.id, problem.size, problem.operators, problem.evaluationResults)
+  def apply(problem: Problem) = new ProblemSpec(problem.id, problem.size, problem.operators, problem.evaluationResults.getOrElse(Map()))
 }

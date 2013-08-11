@@ -8,7 +8,7 @@ import lang.Abstract
 import lang.Concrete
 import client.api.Problem
 
-case class ProblemResponse(id: String, size: Int, operators: List[String], solved: Boolean, timeLeft: Int, evaluationResults: Map[String, String], challenge: String){
+case class ProblemResponse(id: String, size: Int, operators: List[String], solved: Option[Boolean], timeLeft: Option[Int], evaluationResults: Option[Map[String, String]], challenge: Option[String]){
   lazy val asProblem = Problem.convert(this)
 }
 
@@ -38,4 +38,5 @@ trait Server {
   def eval(request: EvalRequest): EvalResponse
   def status(): Status
   def train(size: Int = 0): ProblemResponse
+  def myProblems() : List[ProblemResponse]
 }

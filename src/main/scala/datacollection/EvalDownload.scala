@@ -40,10 +40,9 @@ object EvalDownload extends App {
         log("Attempting to eval for " + problem.id)
 
         val newResults = requestEvalResults(problem, translatedRequests)
-        val updatedResults = if (problem.evaluationResults == null) {
-          newResults.toMap
-        } else {
-          problem.evaluationResults ++ newResults
+        val updatedResults = problem.evaluationResults match {
+          case None => Some(newResults.toMap)
+          case Some(results) => Some(results ++ newResults)
         }
         val updatedProblem = problem.copy(evaluationResults = updatedResults)
         targetStore.write(updatedProblem);

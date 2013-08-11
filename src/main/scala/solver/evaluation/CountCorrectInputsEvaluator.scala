@@ -20,7 +20,7 @@ case class EvaluationResultCounter(correct: Int, wrong: Int, crashed: Int) {
 
 object EvaluationResultCounter {
   def apply(program: Exp, problem: Problem): EvaluationResultCounter = {
-    problem.evaluationResults.foldLeft(EvaluationResultCounter(0, 0, 0)) {
+    problem.evaluationResults.get.foldLeft(EvaluationResultCounter(0, 0, 0)) {
       case (counter, (in, out)) =>
         try {
           if (Semantics.eval(program)(in) == out) {

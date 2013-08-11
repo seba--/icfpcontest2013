@@ -10,7 +10,7 @@ class LocalServer(store: TrainingProblemStore) extends Server {
   private val iter = store.allProblems.iterator
   override def guess(request: GuessRequest): GuessResponse = {
     val program = Concrete.parse(request.program)
-    if (program == store.read(request.id).asProblem.challenge) {
+    if (program == store.read(request.id).asProblem.challenge.get) {
       println("[Server] Correct guess for " + request.id)
       GuessResponse("win", null, null, false)
     } else {
@@ -22,7 +22,7 @@ class LocalServer(store: TrainingProblemStore) extends Server {
     println("[Server] Eval for " + request.id)
     val problem = store.read(request.id).asProblem
     EvalResponse("ok", request.arguments.toList.map { arg =>
-      Semantics.toString(Semantics.eval(problem.challenge)(Semantics.fromString(arg)))
+      Semantics.toString(Semantics.eval(problem.challenge.get)(Semantics.fromString(arg)))
     }, null)
   }
   override def status(): Status = {
@@ -30,5 +30,8 @@ class LocalServer(store: TrainingProblemStore) extends Server {
   }
   override def train(size: Int = 0) : ProblemResponse = {
     iter.next
+  }
+  override def myProblems() = {
+    throw new UnsupportedOperationException
   }
 }

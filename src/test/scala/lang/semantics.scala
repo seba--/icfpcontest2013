@@ -42,9 +42,9 @@ class SomeTests extends FunSuite {
     println("FINISHED deserialization")
     all.foreach { problem =>
       println("Test " + problem.id)
-      val program = Concrete.parse(problem.challenge)
+      val program = Concrete.parse(problem.challenge.get)
       if (problem.evaluationResults != null)
-      problem.evaluationResults.foreach {
+      problem.evaluationResults.get.foreach {
         case (input, output) =>
           val longInput = Semantics.fromString(input)
           val longOutput = Semantics.fromString(output)

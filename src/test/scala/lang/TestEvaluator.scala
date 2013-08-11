@@ -15,8 +15,8 @@ object TestEvaluator extends App {
   val problem = store.read(id)
 
   // LEAVE THE REST DOWN HERE ALONE!
-  val program = Concrete.parse(problem.challenge)
-  (SortedMap[String,String]() ++ problem.evaluationResults).foreach {
+  val program = Concrete.parse(problem.challenge.get)
+  (SortedMap[String,String]() ++ problem.evaluationResults.get).foreach {
     case (input, output) =>
       val longInput = Semantics.fromString(input)
       val longOutput = Semantics.fromString(output)

@@ -21,7 +21,7 @@ case class TestSolver(solver: Solver) {
 
       if (sol.isDefined) {
         solCount += 1
-        spec.evaluationResults.foreach {
+        spec.evaluationResults.get.foreach {
           case (input, output) =>
             val result = Semantics.eval(sol.get)(input)
             if (result != output) {

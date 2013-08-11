@@ -3,6 +3,7 @@ package server.api
 import json.JsonParser
 import http.IcfpcHttpCommunication
 import client.api.Status
+import com.fasterxml.jackson.core.JsonFactory
 
 object IcfpcServer extends Server {
   override def guess(request: GuessRequest): GuessResponse = {
@@ -23,5 +24,15 @@ object IcfpcServer extends Server {
     else
       IcfpcHttpCommunication.get("train")
     JsonParser.deserialize(result, classOf[ProblemResponse])
+  }
+  override def myProblems() = {
+    val response = IcfpcHttpCommunication.get("myproblems")
+    val parser = new JsonFactory().createJsonParser(response.substring(1, response.size - 1).replaceAllLiterally("},", "}"));
+    def myProblems = JsonParser.mapper.readValues(parser, classOf[ProblemResponse])
+    var result = List[ProblemResponse]()
+    while (myProblems.hasNext()) {
+      result ::= myProblems.next()
+    }
+    result
   }
 }
