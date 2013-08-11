@@ -59,6 +59,16 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
           }))
 
         val solutions = Queue[Exp]()
+        def filterSolutions(in: Value, out: Value) {
+          solutions.synchronized {
+            log("[Interact] Dequeued %d incorrect solutions, %d left".format(solutions.dequeueAll { program =>
+              val actual = Semantics.eval(program)(in)
+              val correct = actual == out
+              //                      println("[Solver] "+(if (correct) "passed" else "dropped (" + Semantics.toString(actual) + ")") + ": " + program.toString())
+              !correct
+            }.size, solutions.size))
+          }
+        }
 
         val solverPollingThread = future {
           while (solver.nextSolution() match {
@@ -104,20 +114,17 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
                   log("[Interact] Mismatch for input " + Semantics.toString(in) + ", should result in " + Semantics.toString(out))
                   problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ + (in -> out) })
                   solver.notifyNewData(Map(in -> out))
-                  solutions.synchronized {
-                    log("[Interact] Dequeued %d incorrect solutions, %d left".format(solutions.dequeueAll { program =>
-                      val actual = Semantics.eval(program)(in)
-                      val correct = actual == out
-                      //                      println("[Solver] "+(if (correct) "passed" else "dropped (" + Semantics.toString(actual) + ")") + ": " + program.toString())
-                      !correct
-                    }.size, solutions.size))
-                  }
+                  filterSolutions(in, out)
               }
             case None =>
               log("[Interact] No guesses in queue, sending eval.")
               val newResults = downloadNextEvalResults()
               problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ ++ newResults })
               solver.notifyNewData(newResults.toMap)
+              newResults.foreach {
+                case (in, out) =>
+                  filterSolutions(in, out)
+              }
           }
         }
         killSolver()
