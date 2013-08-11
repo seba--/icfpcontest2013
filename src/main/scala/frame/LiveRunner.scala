@@ -1,14 +1,8 @@
 package frame
 
-import server.api.LocalServer
-import datacollection.TrainingProblemStore
 import client.api.ServerFacade
-import client.api.Problem
-import solver.solvers.BruteForceSizeFilteredSolver
 import server.api.IcfpcServer
-import scala.collection.Iterator
-import datacollection.BotApp
-import server.api.ProblemResponse
+import solver.solvers.BruteForceSizeFilteredSolver
 
 object LiveRunner extends App {
   // solve actual problems
