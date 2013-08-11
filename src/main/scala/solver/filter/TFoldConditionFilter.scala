@@ -77,6 +77,7 @@ class TFoldConditionFilter extends TFoldFilter {
 
 class TFoldExistenceFilter extends TFoldFilter {
   def filter(e: Exp): Int = e match {
+    case Fold(over, init, body) if isTFold => FilterV.OK
     case _ if isTFold => FilterV.STEP_OVER
     case _ => FilterV.OK
   }
