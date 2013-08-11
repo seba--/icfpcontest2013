@@ -26,12 +26,15 @@ object InteractiveSolveAndGuess {
   private val twoBitPerByte = for (i <- 0 to 7) yield (0x1111111111111111L << i)
   private val bitPatterns = singleBits ++ oneBitPerByte ++ twoBitPerByte
   private val primes = Primes.primesUnder(1000)
-  private val patternNumbers = Set(~0L, 0L, ~0x5555555555555555L, 0x5555555555555555L) ++ bitPatterns ++ bitPatterns.map { ~_ } ++ primes ++ primes.map { _ + 1 }
-  def fillWithRandom(initial: Set[Long], size: Int) = {
+  private val patternNumbers = Seq(~0L, 0L, ~0x5555555555555555L, 0x5555555555555555L) ++ bitPatterns ++ bitPatterns.map { ~_ } ++ primes ++ primes.map { _ + 1 }
+  def fillWithRandom(initial: Seq[Long], size: Int) = {
     val random = new Random
     var numbers = initial
     while (numbers.size < size) {
-      numbers += random.nextLong()
+      val next = random.nextLong()
+      if(!numbers.contains(next)) {
+        numbers = numbers :+ next
+      }
     }
     numbers
   }
