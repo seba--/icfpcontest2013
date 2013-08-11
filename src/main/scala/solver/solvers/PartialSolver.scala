@@ -17,15 +17,36 @@ import client.api.Problem
 import lang.Semantics.Value
 import solver.strategies.BruteForceStartExpStrategy
 import lang.Semantics
+import solver.filter.TFoldExistenceFilter
+import solver.filter.ShortcutShiftFilter
+import solver.filter.ValidFoldFilter
+import solver.filter.TFoldConditionFilter
+import solver.filter.ConstantFoldingFilter
+import solver.filter.IdentityOpFilter
+import solver.mutators.TFoldMutatorDecorator
 
 class PartialSolver extends Solver {
 
   var spec: ProblemSpec = null
-  var strategy: Strategy = null
   var isInterrupted = false
+  var currentStrategy: Strategy = null
+  val defaultFilters = List(
+    // STEP_OVER-Filter
+    new TFoldExistenceFilter //OVER
+    , new SizeFilter // OVER
+    //    , new ShortcutShiftFilter //OVER
+    // both-STEP-Filter (at most one)
+    //    new ValidFoldFilter, //both
+    // STEP_INTO-Filter
+    , new TFoldConditionFilter //INTO
+    //, new ConstantFoldingFilter //INTO
+    // , new IdentityOpFilter //INTO
+    //new BinaryComparisonFilter, //INTO)
+    )
 
   def init(problem: Problem) {
     this.spec = ProblemSpec(problem)
+    isInterrupted = false
   }
 
   def notifyNewData(delta: Map[Value, Value]) {
@@ -36,6 +57,9 @@ class PartialSolver extends Solver {
     var partitions = List[Partition]()
 
     for (inputOutputTuple <- spec.data) {
+      if (isInterrupted)
+        return None
+
       if (!partitions.exists(fits(_, inputOutputTuple))) {
         if (!partitions.exists(tryFit(_, inputOutputTuple))) {
           println("Creating new partition")
@@ -52,7 +76,7 @@ class PartialSolver extends Solver {
   }
 
   def createExp(partitions: List[Partition], unmatchedData: Map[Long, Long]): Option[Exp] = {
-    if (partitions.size == 1)
+    if (partitions.size == 1 || isInterrupted)
       return Some(partitions.head.solution)
 
     for (partition <- partitions) {
@@ -75,7 +99,10 @@ class PartialSolver extends Solver {
     var matchData = Map[Long, Long]()
     matchInput.foreach(x => matchData = matchData + (x -> 0L))
     matchNotInput.foreach(x => matchData = matchData + (x -> 1L))
-    createConditionStrategy(createSubProblem(matchData)).nextSolution
+    currentStrategy = createConditionStrategy(createSubProblem(matchData))
+    if (isInterrupted)
+      return None
+    currentStrategy.nextSolution
   }
 
   def fits(partition: Partition, dataPoint: (Long, Long)): Boolean = {
@@ -89,8 +116,11 @@ class PartialSolver extends Solver {
 
   def tryFit(partition: Partition, dataPoint: (Long, Long)): Boolean = {
     val data = partition.currentData + dataPoint
-    val strategy = createStrategy(createSubProblem(data), partition.solution)
-    val currentSolution = strategy.nextSolution
+    currentStrategy = createStrategy(createSubProblem(data), partition.solution)
+    if (isInterrupted)
+      return true
+
+    val currentSolution = currentStrategy.nextSolution
     if (currentSolution.isDefined) {
       println(String.format("%s fits partition: \n\tPrevious \'%s' \n\tNew: \t'%s'",
         dataPoint, partition.solution, currentSolution.get))
@@ -109,20 +139,22 @@ class PartialSolver extends Solver {
 
   def createStrategy(spec: ProblemSpec, initial: Exp): Strategy = {
     val strategy = new BruteForceStartExpStrategy(initial)
-    val filter = new CompositeFilter(List(new SizeFilter, new EvalFilter))
-    strategy.init(spec, LinearMutator, filter, ConstantFitness(1.0))
+    val filter = new CompositeFilter(defaultFilters ++ List(new EvalFilter))
+    strategy.init(spec, new TFoldMutatorDecorator(LinearMutator), filter, ConstantFitness(1.0))
     return strategy
   }
 
   def createConditionStrategy(spec: ProblemSpec): Strategy = {
     val strategy = new BruteForceInitialDataStrategy
-    val filter = new CompositeFilter(List(new SizeFilter, new EvalNeqZeroFilter))
+    val filter = new CompositeFilter(defaultFilters ++ List(new EvalNeqZeroFilter))
     strategy.init(spec, LinearMutator, filter, ConstantFitness(1.0))
     return strategy
   }
 
   def interrupt() {
     isInterrupted = true
+    if (currentStrategy != null)
+      currentStrategy.interrupt()
   }
 
   class Partition(
