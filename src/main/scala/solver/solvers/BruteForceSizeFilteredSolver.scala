@@ -23,12 +23,13 @@ class BruteForceSizeFilteredSolver extends Solver {
     strategy = new BruteForceInitialDataStrategy
     val filters = List(
       // STEP_OVER-Filter
+      new TFoldExistenceFilter, //OVER
       new SizeFilter, // OVER
       new ShortcutShiftFilter, //OVER
       // both-STEP-Filter (at most one)
       new ValidFoldFilter, //both
       // STEP_INTO-Filter
-      new TFoldConditionFilter, //both, but OVER does not occur while using TFoldMutatorDecorator
+      new TFoldConditionFilter, //INTO
       new ConstantFoldingFilter, //INTO
       new IdentityOpFilter, //INTO
       //new BinaryComparisonFilter, //INTO
