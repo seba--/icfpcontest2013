@@ -21,6 +21,7 @@ import scala.util.Random
 import scala.concurrent.duration._
 import scala.util.Failure
 import scala.util.Success
+import javax.xml.ws.http.HTTPException
 
 object InteractiveSolveAndGuess {
   private val singleBits = for (i <- 0 to 63) yield (1L << i)
@@ -46,7 +47,7 @@ object InteractiveSolveAndGuess {
 class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Problem]) {
   def apply(solver: Solver) {
     while (problems.hasNext) {
-      {
+        try{
         var problem = problems.next()
         log("Now solving problem: " + problem)
         val iter = InteractiveSolveAndGuess.numbers.iterator
@@ -158,6 +159,9 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
           }
         }
         // TODO store problem
+      } catch {
+        case e: HTTPException if(e.getMessage() == "412: already solved") =>
+          log("[Interact] already solved, skipping to next problem.");
       }
     }
     log("[Interact] No more problems, terminating.")
