@@ -13,6 +13,23 @@ import java.io.File
 import datacollection.TrainingProblemStore
 import lang.Concrete
 import server.api.ProblemResponse
+import server.api.TrainingRequest
+
+trait OperatorRestriction {
+  val jsonParameter: Option[List[String]]
+}
+case object DontCare extends OperatorRestriction {
+  override val jsonParameter = None
+}
+case object NoFold extends OperatorRestriction {
+  override val jsonParameter = Some(List())
+}
+case object WithTFold extends OperatorRestriction {
+  override val jsonParameter = Some(List("tfold"))
+}
+case object WithFold extends OperatorRestriction {
+  override val jsonParameter = Some(List("fold"))
+}
 
 case class Problem(id: String, size: Int, operators: List[Operator], solved: Option[Boolean], timeLeft: Option[Int], evaluationResults: Option[Map[Long, Long]], challenge: Option[Exp])
 object Problem {
@@ -25,7 +42,7 @@ object Problem {
     val operatorsToOperators = problem.operators.map {
       Concrete.tryParseOperator(_).get
     }
-    val challengeToExp = problem.challenge .map{Concrete.parse(_)}
+    val challengeToExp = problem.challenge.map { Concrete.parse(_) }
     Problem(problem.id, problem.size, operatorsToOperators, problem.solved, problem.timeLeft, evaluationResultsAsLong, challengeToExp)
   }
 }
@@ -48,7 +65,7 @@ case class Status(easyChairId: String, contestScore: Int, lightningScore: Int, t
 class ServerFacade(theServer: Server) {
   val trainingStore = new TrainingProblemStore(new File("problems/train3"))
   def myProblems(): Seq[Problem] = {
-    theServer.myProblems().map{_.asProblem}
+    theServer.myProblems().map { _.asProblem }
   }
   val trainingProblems: Seq[Problem] = trainingStore.allProblems.map { _.asProblem }
   def guess(id: String, program: Exp): GuessResponse = {
@@ -61,7 +78,7 @@ class ServerFacade(theServer: Server) {
   def status(): Status = {
     theServer.status
   }
-  def train(size: Int = 0): Problem = {
-    theServer.train(size).asProblem
+  def train(operatorRestriction: OperatorRestriction = DontCare, size: Int = 0): Problem = {
+    theServer.train(new TrainingRequest(if (size == 0) None else Some(size), operatorRestriction.jsonParameter)).asProblem
   }
 }
