@@ -14,7 +14,7 @@ class BruteForceStartExpStrategy(val initial: Exp) extends Strategy {
   var isInterrupted = false
   var current: Exp = initial
 
-  def notifyNewData(delta: Map[Long, Long]) {
+  def selfNotification(delta: Map[Long, Long]) {
     // reset: this solver requires full initial data
     current = initial
   }

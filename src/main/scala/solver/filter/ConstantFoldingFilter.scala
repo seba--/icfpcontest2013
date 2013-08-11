@@ -36,9 +36,9 @@ class ConstantFoldingFilter extends Filter {
       case UApp(op, e1) => isConst(e1)
       case BApp(op, e1, e2) => isConst(e1) && isConst(e2)
       case b@Box() => if (b.isEmpty) false else isConst(b.e)
-      case MainVar() => false
-      case FoldAcc() => false
-      case FoldNext() => false
+      case MainVar => false
+      case FoldAcc => false
+      case FoldNext => false
       case _ => true
     }
 }

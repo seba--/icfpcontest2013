@@ -14,7 +14,7 @@ class ParserSuite extends FunSuite {
 
   test("id function") {
     val res = parse("(lambda (x) x)")
-    assert(res === MainVar())
+    assert(res === MainVar)
   }
 
 
@@ -102,7 +102,7 @@ class TrainingDataParserSuite extends FunSuite {
   test("training data") {
     TrainingProblemStore.default.allProblems.foreach { prob =>
       try {
-        parse(prob.challenge)
+        parse(prob.challenge.get)
       } catch {
         case ParseException(msg, str) =>
           println("FAILED " + prob.id)

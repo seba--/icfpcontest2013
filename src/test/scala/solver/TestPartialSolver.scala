@@ -17,7 +17,7 @@ class PartialSolverTest extends FunSuite with TestUtils {
 
   // 03dMrc1C9TLG8lNLiFFmYsyT // (size 25)
   test("1kqy5F4l3GIrDzZL73e4ZLrO") {
-    testProblem(client.api.Problem(store.read("1kqy5F4l3GIrDzZL73e4ZLrO")))
+    testProblem(store.read("1kqy5F4l3GIrDzZL73e4ZLrO").asProblem)
   }
 
 }

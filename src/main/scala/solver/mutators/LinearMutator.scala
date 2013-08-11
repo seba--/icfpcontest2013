@@ -45,11 +45,11 @@ object LinearMutator extends Mutator {
     else {
       val modification = e match {
         case b @ Box() => if (b.isEmpty) Right(false) else stepOver_(b.e)
-        case Zero() => Right(false)
-        case One() => Right(false)
-        case MainVar() => Right(false)
-        case FoldNext() => Right(false)
-        case FoldAcc() => Right(false)
+        case Zero => Right(false)
+        case One => Right(false)
+        case MainVar => Right(false)
+        case FoldNext => Right(false)
+        case FoldAcc => Right(false)
         case ifExp @ IfZero(_, _, _) => {
           stepOver_(ifExp.cond) match {
             case Left(e) =>
@@ -63,14 +63,14 @@ object LinearMutator extends Mutator {
                     case None => Right(true)
                     case Some(e) => {
                       ifExp.no = e
-                      ifExp.yes = Zero()
-                      ifExp.cond = Zero()
+                      ifExp.yes = Zero
+                      ifExp.cond = Zero
                       Left(ifExp)
                     }
                   }
                   case Some(e) => {
                     ifExp.yes = e
-                    ifExp.cond = Zero()
+                    ifExp.cond = Zero
                     Left(ifExp)
                   }
                 }
@@ -92,8 +92,8 @@ object LinearMutator extends Mutator {
                       case None => Right(true)
                       case Some(e) => {
                         ifExp.no = e
-                        ifExp.yes = Zero()
-                        ifExp.cond = Zero()
+                        ifExp.yes = Zero
+                        ifExp.cond = Zero
                         Left(ifExp)
                       }
                     }
@@ -137,14 +137,14 @@ object LinearMutator extends Mutator {
                     case None => Right(true)
                     case Some(e) => {
                       fold.body = e
-                      fold.init = Zero()
-                      fold.over = Zero()
+                      fold.init = Zero
+                      fold.over = Zero
                       Left(fold)
                     }
                   }
                   case Some(e) => {
                     fold.init = e
-                    fold.over = Zero()
+                    fold.over = Zero
                     Left(fold)
                   }
                 }
@@ -166,8 +166,8 @@ object LinearMutator extends Mutator {
                       case None => Right(true)
                       case Some(e) => {
                         fold.body = e
-                        fold.init = Zero()
-                        fold.over = Zero()
+                        fold.init = Zero
+                        fold.over = Zero
                         Left(fold)
                       }
                     }
@@ -228,7 +228,7 @@ object LinearMutator extends Mutator {
                   case None => Right(true)
                   case Some(e) => {
                     bExp.e2 = e
-                    bExp.e1 = Zero()
+                    bExp.e1 = Zero
                     Left(bExp)
                   }
                 }
@@ -276,12 +276,12 @@ object LinearMutator extends Mutator {
 
   def stepInto_(e: Exp): Option[Exp] = {
     val modification = e match {
-      case b @ Box() => if (b.isEmpty) Some(Zero()) else stepInto(b.e)
-      case Zero() => Some(One())
-      case One() => Some(MainVar())
-      case MainVar() => Some(FoldAcc())
-      case FoldAcc() => Some(FoldNext())
-      case FoldNext() => Some(MutatorUtils.getMinimalExpressionForOperator(ops(0)))
+      case b @ Box() => if (b.isEmpty) Some(Zero) else stepInto(b.e)
+      case Zero => Some(One)
+      case One => Some(MainVar)
+      case MainVar => Some(FoldAcc)
+      case FoldAcc => Some(FoldNext)
+      case FoldNext => Some(MutatorUtils.getMinimalExpressionForOperator(ops(0)))
       case ifExp @ IfZero(_, _, _) => {
         val newCond = stepInto(ifExp.cond)
         if (newCond.isDefined) {
@@ -290,14 +290,14 @@ object LinearMutator extends Mutator {
         } else {
           val newThen = stepInto(ifExp.yes)
           if (newThen.isDefined) {
-            ifExp.cond = Zero()
+            ifExp.cond = Zero
             ifExp.yes = newThen.get
             Some(ifExp)
           } else {
             val newElse = stepInto(ifExp.no)
             if (newElse.isDefined) {
-              ifExp.cond = Zero()
-              ifExp.yes = Zero()
+              ifExp.cond = Zero
+              ifExp.yes = Zero
               ifExp.no = newElse.get
               Some(ifExp)
             } else
@@ -321,7 +321,7 @@ object LinearMutator extends Mutator {
         } else {
           val newRight = stepInto(bExp.e2)
           if (newRight.isDefined) {
-            bExp.e1 = Zero()
+            bExp.e1 = Zero
             bExp.e2 = newRight.get
             Some(bExp)
           } else
@@ -336,14 +336,14 @@ object LinearMutator extends Mutator {
         } else {
           val newInit = stepInto(fold.init)
           if (newInit.isDefined) {
-            fold.over = Zero()
+            fold.over = Zero
             fold.init = newInit.get
             Some(fold)
           } else {
             val newBody = stepInto(fold.body)
             if (newBody.isDefined) {
-              fold.over = Zero()
-              fold.init = Zero()
+              fold.over = Zero
+              fold.init = Zero
               fold.body = newBody.get
               Some(fold)
             } else

@@ -15,7 +15,7 @@ class BruteForceSizeFilteredSolverTest extends FunSuite with TestUtils {
   implicit val solver = new BruteForceSizeFilteredSolver
 
   test("1kqy5F4l3GIrDzZL73e4ZLrO") {
-    testProblem(client.api.Problem(store.read("1kqy5F4l3GIrDzZL73e4ZLrO")))
+    testProblem(store.read("1kqy5F4l3GIrDzZL73e4ZLrO").asProblem)
   }
 
   //  test("BruteForceSizeFilteredSolver") {

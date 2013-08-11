@@ -36,8 +36,8 @@ class ValidFoldFilter extends Filter {
         hasFold = true
         Math.max(filter(over, true), Math.max(filter(init, true), filter(body, true)))
       }
-      case FoldNext() => if (inFold) FilterV.OK else FilterV.STEP_INTO
-      case FoldAcc() => if (inFold) FilterV.OK else FilterV.STEP_INTO
+      case FoldNext => if (inFold) FilterV.OK else FilterV.STEP_INTO
+      case FoldAcc => if (inFold) FilterV.OK else FilterV.STEP_INTO
       case UApp(op, e1) => filter(e1, inFold)
       case BApp(op, e1, e2) => Math.max(filter(e1, inFold), filter(e2, inFold))
       case b @ Box() => if (b.isEmpty) FilterV.OK else filter(b.e, inFold)

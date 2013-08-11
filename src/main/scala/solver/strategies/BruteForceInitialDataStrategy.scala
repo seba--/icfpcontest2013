@@ -14,17 +14,17 @@ class BruteForceInitialDataStrategy extends Strategy {
   var isInterrupted = false
   var current: Exp = Box()
   
-  def notifyNewData(delta: Map[Long, Long]) {
+  def selfNotification(delta: Map[Long, Long]) {
     // reset: this solver requires full initial data
-    current = Box()
   }
 
   // Find next solution, or return None.
   def nextSolution(): Option[Exp] = {
     var next = mutator.stepInto(current)
     while (true) {
-      if (isInterrupted || !next.isDefined)
+      if (isInterrupted || !next.isDefined) {
         return None
+      }
 
       current = next.get
 

@@ -6,8 +6,12 @@ import datacollection.TrainingProblemStore
 import java.io.FileNotFoundException
 import lang.Abstract
 import lang.Concrete
+import client.api.Problem
+import client.api.OperatorRestriction
 
-case class ProblemResponse(id: String, size: Int, operators: List[String], solved: Boolean, timeLeft: Int, evaluationResults: Map[String, String], challenge: String)
+case class ProblemResponse(id: String, size: Int, operators: List[String], solved: Option[Boolean], timeLeft: Option[Int], evaluationResults: Option[Map[String, String]], challenge: Option[String]){
+  lazy val asProblem = Problem.convert(this)
+}
 
 case class EvalRequest(id: String, arguments: Seq[String]) {
 //  try{
@@ -30,9 +34,12 @@ case class EvalResponse (status: String, outputs: List[String], message: String)
 case class GuessRequest(id: String, program: String)
 case class GuessResponse(status: String, values: List[String], message: String, lightning: Boolean)
 
+case class TrainingRequest(size: Option[Int], operators: Option[List[String]])
+
 trait Server {
   def guess(request: GuessRequest): GuessResponse
   def eval(request: EvalRequest): EvalResponse
   def status(): Status
-  def train(size: Int = 0): ProblemResponse
+  def train(trainingRequest: TrainingRequest): ProblemResponse
+  def myProblems() : List[ProblemResponse]
 }
