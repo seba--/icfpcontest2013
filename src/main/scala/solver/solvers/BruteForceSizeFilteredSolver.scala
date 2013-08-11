@@ -22,13 +22,19 @@ class BruteForceSizeFilteredSolver extends Solver {
     problemSpec = ProblemSpec(problem)
     strategy = new BruteForceInitialDataStrategy
     val filters = List(
-      new SizeFilter,
-      new ValidFoldFilter,
-      new ConstantFoldingFilter,
-      new ShortcutShiftFilter,
-      new IdentityOpFilter,
-      new TFoldConditionFilter,
-      new EvalFilter)
+      // STEP_OVER-Filter
+      new SizeFilter, // OVER
+      // both-STEP-Filter (at most one)
+      // STEP_INTO-Filter
+
+      new ValidFoldFilter, //both
+      new ConstantFoldingFilter, //INTO
+      new ShortcutShiftFilter, //INTO
+      new IdentityOpFilter, //INTO
+      new TFoldConditionFilter, //both
+      //new BinaryComparisonFilter, //INTO
+      new EvalFilter //INTO
+      )
     strategy.init(problemSpec, LinearMutator, new CompositeFilter(filters), ConstantFitness(1.0))
   }
 
