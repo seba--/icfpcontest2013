@@ -31,16 +31,20 @@ class TFoldConditionFilter extends Filter {
     // ignore
   }
 
-  def filter(e: Exp): Int = if (isTFold) {
-    if (filterTFold(e)) FilterV.OK else FilterV.STEP_OVER
-  } else {
-    if(filterFirstFold(e)) FilterV.OK else FilterV.STEP_OVER
-  }
+  def filter(e: Exp): Int = e match {
+    case Fold(over, init, body) if isTFold =>
+      if (over == MainVar() && init == Zero() && !containsMainVar(body))
+        FilterV.OK
+      else
+        FilterV.STEP_INTO
+    case _ if isTFold => FilterV.STEP_OVER
 
-  def filterTFold(e: Exp): Boolean = e match {
-    case Fold(over, init, body) =>
-      over == MainVar() && init == Zero() && !containsMainVar(body)
-    case _ => false
+    case Fold(over, init, body) if !isTFold =>
+      if (over == MainVar() && init == Zero() && !containsMainVar(body))
+        FilterV.STEP_INTO
+      else
+        FilterV.OK
+    case _ => FilterV.OK
   }
 
   def filterFirstFold(e: Exp): Boolean = e match {

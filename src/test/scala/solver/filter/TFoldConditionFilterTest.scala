@@ -19,7 +19,7 @@ class TFoldConditionFilterTest extends FilterTest {
 
   test("fold is not accepted as first node if no tnode is given") {
     initFilterWithOps(And, Or)
-    assertDenies("(lambda (x) (fold x 0 (lambda (x y) x)))")
+    assertStepInto("(lambda (x) (fold x 0 (lambda (x y) x)))")
   }
 
   test("fold is accepted as first node if no tnode is given because 1 != 0") {
@@ -34,16 +34,16 @@ class TFoldConditionFilterTest extends FilterTest {
 
   test("no tfold but required should be denied") {
     initFilterWithOps(TFold)
-    assertDenies("(lambda (x) (or x 1))")
+    assertStepOver("(lambda (x) (or x 1))")
   }
 
   test("tfold with main var in fold body should  be denied") {
     initFilterWithOps(TFold)
-    assertDenies("(lambda (x) (fold x 0 (lambda (a b) x)))")
+    assertStepInto("(lambda (x) (fold x 0 (lambda (a b) x)))")
   }
 
   test("tfold with init other than 0 should be denied") {
     initFilterWithOps(TFold)
-    assertDenies("(lambda (x) (fold x 1 (lambda (a b) 0)))")
+    assertStepInto("(lambda (x) (fold x 1 (lambda (a b) 0)))")
   }
 }

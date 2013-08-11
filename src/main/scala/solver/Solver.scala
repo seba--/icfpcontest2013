@@ -12,4 +12,5 @@ trait Solver {
   // notify about new evaluation data, will be already registered in problem spec
   def notifyNewData(delta: Map[Value, Value]): Unit
   def nextSolution(): Option[Exp]
+  def interrupt()
 }

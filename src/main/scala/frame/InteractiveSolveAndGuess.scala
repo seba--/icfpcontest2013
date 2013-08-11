@@ -1,5 +1,6 @@
 package frame
 
+import datacollection.BotApp._
 import solver.Solver
 import scala.collection.mutable.Queue
 import solver.ProblemSpec
@@ -15,38 +16,66 @@ import json.JsonParser
 import client.api.Problem
 import lang.Semantics.Value
 import client.api._
+import scala.collection.immutable.SortedSet
+import scala.util.Random
+import scala.concurrent.duration._
 
-class InteractiveSolveAndGuess (val server : ServerFacade, allProblems: Iterable[Problem]){
-  val problems = Queue[Problem]() ++ allProblems
-  val numbers = Seq[Value]()
+object InteractiveSolveAndGuess {
+  private val primes = Primes.primesUnder(1000)
+  private val singleBits = for (i <- 0 to 63) yield (1L << i)
+  private val oneBitPerByte = for (i <- 0 to 7) yield (0x0101010101010101L << i)
+  private val twoBitPerByte = for (i <- 0 to 7) yield (0x1111111111111111L << i)
+  private val bitPatterns = singleBits ++ oneBitPerByte ++ twoBitPerByte
+  private val patternNumbers = SortedSet(~0L, 0L, ~0x5555555555555555L, 0x5555555555555555L) ++ primes ++ primes.map { _ + 1 } ++ bitPatterns ++ bitPatterns.map { ~_ }
+  def fillWithRandom(initial: SortedSet[Long], size: Int) = {
+    val random = new Random
+    var numbers = initial
+    while (numbers.size < size) {
+      numbers += random.nextLong()
+    }
+    numbers
+  }
+  val numbers = fillWithRandom(patternNumbers, 256 * 75)
+}
 
+class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Problem]) {
   def apply(solver: Solver) {
-    while (!problems.isEmpty) {
-      var problem = problems.dequeue()
-      val iter = numbers.iterator
-      def downloadNextEvalResults() = server.eval(problem.id, iter.take(256).toSeq)
+    while (problems.hasNext) {
+      {
+        var problem = problems.next()
+        log("Now solving problem: " + problem)
+        val iter = InteractiveSolveAndGuess.numbers.iterator
+        def downloadNextEvalResults() = server.eval(problem.id, iter.take(256).toSeq)
 
-      val timeout = System.currentTimeMillis() + 5 * 60 * 1000
-      def timeLeft() = timeout - System.currentTimeMillis()
-      def sholdContinue() = !problem.solved && timeLeft() > 0
-      
-      val initialResults = downloadNextEvalResults()
-      solver.init(problem)
-      
-      val solutions = Queue[Exp]()
+        val timeout = System.currentTimeMillis() + 5 * 60 * 1000
+        def timeLeft() = timeout - System.currentTimeMillis()
 
-      while (sholdContinue()) {
-        future {
+        val initialResults = downloadNextEvalResults()
+        solver.init(problem.copy(evaluationResults = initialResults.toMap))
+        problem = problem.copy(evaluationResults =
+          if (problem.evaluationResults == null)
+            initialResults.toMap
+          else
+            problem.evaluationResults ++ initialResults.toMap)
+
+        val solutions = Queue[Exp]()
+
+        val solverPollingThread = future {
           while (solver.nextSolution() match {
             case Some(e) =>
+              log("[Solver] new guess: " + e.toString())
+              val ec = Concrete.parse(s"(lambda (main_var) $e)")
               solutions.synchronized {
-                solutions += e
+                solutions += ec
               }
               true
             case None =>
+              log("[Solver] no more guesses.")
               false
           }) {}
         }
+
+        def sholdContinue() = !problem.solved && timeLeft() > 0 && (!solverPollingThread.isCompleted || !solutions.isEmpty)
 
         while (sholdContinue()) {
           BotApp.sleep(4)
@@ -55,23 +84,56 @@ class InteractiveSolveAndGuess (val server : ServerFacade, allProblems: Iterable
             if (solutions.isEmpty) None else Some(solutions.dequeue())
           } match {
             case Some(program) =>
+              println("Sending guess: " + program.toString())
               server.guess(problem.id, program) match {
                 case Win =>
+                  log("Correct guess! Awaiting solver termination...")
                   problem = problem.copy(solved = true)
+                  solver.interrupt()
+                  Await.result(solverPollingThread, Duration(100, MILLISECONDS))
+                  log("Solver terminated, continuing with next Problem.")
                 case Error(message) =>
-                //TODO
+                  log("Error: " + message)
+                //TODO do something
                 case Mismatch(in, out, _) =>
+                  log("Mismatch for input " + in + ", should result in " + out)
                   problem = problem.copy(evaluationResults = problem.evaluationResults + (in -> out))
                   solver.notifyNewData(Map(in -> out))
+                  solutions.synchronized {
+                    solutions.filter { program =>
+                      val actual = Semantics.eval(program)(in)
+                      val result = actual == out
+                      println((if (result) "passed" else "dropped (" + actual + ")") + ": " + program.toString())
+                      result
+                    }
+                  }
               }
             case None =>
+              log("No guesses in queue, sending eval.")
               val newResults = downloadNextEvalResults()
               problem = problem.copy(evaluationResults = problem.evaluationResults ++ newResults)
               solver.notifyNewData(newResults.toMap)
           }
         }
+        // TODO interrupt solver here too
         // TODO store problem
       }
     }
   }
+}
+
+object Primes {
+  def primesUnder(n: Long): List[Long] = {
+    require(n >= 2)
+
+    def rec(i: Long, primes: List[Long]): List[Long] = {
+      if (i >= n) primes
+      else if (prime(i, primes)) rec(i + 1, i :: primes)
+      else rec(i + 1, primes)
+    }
+
+    rec(2, List()).reverse
+  }
+
+  def prime(num: Long, factors: List[Long]): Boolean = factors.forall(num % _ != 0)
 }

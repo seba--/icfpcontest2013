@@ -17,4 +17,11 @@ object IcfpcServer extends Server {
     val result = IcfpcHttpCommunication.get("status")
     JsonParser.deserialize(result, classOf[Status])
   }
+  override def train(size: Int = 0): ProblemResponse = {
+    val result = if (size > 0)
+      IcfpcHttpCommunication.post("train", s"""{ "size": ${size} }""")
+    else
+      IcfpcHttpCommunication.get("train")
+    JsonParser.deserialize(result, classOf[ProblemResponse])
+  }
 }

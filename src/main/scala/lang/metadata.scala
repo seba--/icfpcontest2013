@@ -14,7 +14,7 @@ object Metadata {
     case FoldNext() => 1
     case FoldAcc() => 1
     case IfZero(cond, yes, no) => 1 + size_(cond) + size_(yes) + size_(no)
-    case Fold(over, init, body) => 2 + size(over) + size_(init) + size_(body)
+    case Fold(over, init, body) => 2 + size_(over) + size_(init) + size_(body)
     case UApp(op, e) => 1 + size_(e)
     case BApp(op, e1, e2) => 1 + size_(e1) + size_(e2)
   }

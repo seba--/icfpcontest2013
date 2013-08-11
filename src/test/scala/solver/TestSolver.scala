@@ -6,7 +6,6 @@ import org.scalatest.FunSuite
 import solver.solvers.BruteForceSizeFilteredSolver
 import datacollection.TrainingProblemStore
 import java.io.File
-import lang.Concrete
 import client.api.Problem
 
 case class TestSolver(solver: Solver) {
@@ -39,16 +38,17 @@ case class TestSolver(solver: Solver) {
 class BruteForceSizeFilteredSolverTest extends FunSuite {
   val store = TrainingProblemStore(new File("problems/trainWith0to255eval"))
 
-  test("03dMrc1C9TLG8lNLiFFmYsyT") {
-    testProblem(store.read("03dMrc1C9TLG8lNLiFFmYsyT"))
+
+  test("0PjBTiYHj7k3A6d0rLgZ254G") {
+    testProblem(client.api.Problem(store.read("0PjBTiYHj7k3A6d0rLgZ254G")))
   }
-/*
-    test("BruteForceSizeFilteredSolver") {
-      store.allProblems.foreach { problem =>
-        testProblem(client.api.Problem(problem))
-      }
-    }
-    */
+
+//  test("BruteForceSizeFilteredSolver") {
+//    store.allProblems.foreach {
+//      problem =>
+//        testProblem(client.api.Problem(problem))
+//    }
+//  }
 
   def testProblem(problem: Problem) {
     println("TEST " + problem.id)

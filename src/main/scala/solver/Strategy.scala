@@ -26,4 +26,5 @@ abstract class Strategy {
   def notifyNewData(delta: Map[Long, Long]): Unit
   // Find next solution, or return None.
   def nextSolution(): Option[Exp]
+  def interrupt()
 }

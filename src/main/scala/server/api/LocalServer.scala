@@ -3,18 +3,32 @@ package server.api
 import datacollection.TrainingProblemStore
 import client.api.Status
 import lang.Semantics
+import client.api.Problem
+import lang.Concrete
 
 class LocalServer(store: TrainingProblemStore) extends Server {
+  private val iter = store.allProblems.iterator
   override def guess(request: GuessRequest): GuessResponse = {
-    throw new UnsupportedOperationException
+    val program = Concrete.parse(request.program)
+    if (program == Problem(store.read(request.id)).challenge) {
+      println("[Server] Correct guess for " + request.id)
+      GuessResponse("win", null, null, false)
+    } else {
+      println("[Server] Wrong guess for " + request.id + ": " + request.program)
+      GuessResponse("error", null, "check not properly implemented", false)
+    }
   }
   override def eval(request: EvalRequest): EvalResponse = {
-    val problem = client.api.Problem(store.read(request.id))
+    println("[Server] Eval for " + request.id)
+    val problem = Problem(store.read(request.id))
     EvalResponse("ok", request.arguments.toList.map { arg =>
       Semantics.toString(Semantics.eval(problem.challenge)(Semantics.fromString(arg)))
     }, null)
   }
   override def status(): Status = {
     throw new UnsupportedOperationException
+  }
+  override def train(size: Int = 0) : ProblemResponse = {
+    iter.next
   }
 }
