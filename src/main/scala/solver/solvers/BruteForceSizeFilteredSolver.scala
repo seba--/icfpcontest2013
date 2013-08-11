@@ -28,7 +28,7 @@ class BruteForceSizeFilteredSolver extends Solver {
       // both-STEP-Filter (at most one)
       new ValidFoldFilter, //both
       // STEP_INTO-Filter
-      new TFoldConditionFilter, //both
+      new TFoldConditionFilter, //both, but OVER does not occur while using TFoldMutatorDecorator
       new ConstantFoldingFilter, //INTO
       new IdentityOpFilter, //INTO
       //new BinaryComparisonFilter, //INTO
