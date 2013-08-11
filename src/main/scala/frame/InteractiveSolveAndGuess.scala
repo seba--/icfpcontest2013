@@ -19,6 +19,8 @@ import client.api._
 import scala.collection.immutable.SortedSet
 import scala.util.Random
 import scala.concurrent.duration._
+import scala.util.Failure
+import scala.util.Success
 
 object InteractiveSolveAndGuess {
   private val singleBits = for (i <- 0 to 63) yield (1L << i)
@@ -74,6 +76,7 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
         }
 
         val solverPollingThread = future {
+          log("[Solver] starting search")
           while (solver.nextSolution() match {
             case Some(e) =>
               log("[Solver] new guess: " + e.toString())
@@ -83,9 +86,9 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
               }
               true
             case None =>
-              log("[Solver] no more guesses, solver terminated.")
               false
           }) {}
+          log("[Solver] no more guesses, solver terminated.")
         }
         def killSolver() = {
           if (!solverPollingThread.isCompleted) {
@@ -117,23 +120,33 @@ class InteractiveSolveAndGuess(val server: ServerFacade, problems: Iterator[Prob
                   problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ + (in -> out) })
                   solver.notifyNewData(Map(in -> out))
                   val (wrong, left) = filterSolutions(in, out)
-                  if(wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
+                  if (wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
               }
             case None =>
               log("[Interact] No guesses in queue, sending eval.")
               val newResults = downloadNextEvalResults()
               problem = problem.copy(evaluationResults = problem.evaluationResults.map { _ ++ newResults })
               solver.notifyNewData(newResults.toMap)
-              val(wrong, left) = newResults.foldLeft((0, 0)) {
+              val (wrong, left) = newResults.foldLeft((0, 0)) {
                 case ((wrong, left), (in, out)) =>
                   val (newWrong, newLeft) = filterSolutions(in, out)
                   (wrong + newWrong, newLeft)
               }
-              if(wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
+              if (wrong != 0 || left != 0) log("[Interact] Dequeued %d incorrect solutions, %d left".format(wrong, left))
           }
         }
         killSolver()
-        if(timeLeft() < 0) log("Problem timed out.")
+        if (problem.solved != Some(true)) {
+          log("[Interact] problem aborted. Reasons:")
+          solverPollingThread.value.get match {
+            case Failure(e) =>
+              log("[Interact] Solver crashed!")
+              e.printStackTrace()
+            case Success(_) =>
+              log("[Interact] Solver terminated with no further solutions.")
+          }
+          if (timeLeft() < 0) log("[Interact] Problem timed out.")
+        }
         // TODO store problem
       }
     }

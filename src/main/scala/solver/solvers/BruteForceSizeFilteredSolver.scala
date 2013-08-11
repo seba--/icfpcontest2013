@@ -35,7 +35,8 @@ class BruteForceSizeFilteredSolver extends Solver {
       //new BinaryComparisonFilter, //INTO
       new EvalFilter //INTO
       )
-    strategy.init(problemSpec, LinearMutator, new CompositeFilter(filters), ConstantFitness(1.0))
+//    strategy.init(problemSpec, LinearMutator, new CompositeFilter(filters), ConstantFitness(1.0))
+    strategy.init(problemSpec, new TFoldMutatorDecorator(LinearMutator), new CompositeFilter(filters), ConstantFitness(1.0))
   }
 
   def notifyNewData(delta: Map[Long, Long]) {
