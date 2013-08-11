@@ -21,10 +21,16 @@ case class TrainingProblemStore(folder: File) {
   }
 
   def read(id: String) = {
-    cache.get(id).getOrElse {
-      val result = JsonParser.deserialize(scala.io.Source.fromFile(new File(folder, id)).mkString, classOf[ProblemResponse])
-      cache += (id -> result)
-      result
+    try {
+      cache.get(id).getOrElse {
+        val result = JsonParser.deserialize(scala.io.Source.fromFile(new File(folder, id)).mkString, classOf[ProblemResponse])
+        cache += (id -> result)
+        result
+      }
+    } catch {
+      case e: Exception =>
+        println(id)
+        throw e
     }
   }
 
@@ -32,7 +38,7 @@ case class TrainingProblemStore(folder: File) {
     new File(folder, id).isFile()
   }
 
-  def ids() = folder.list();
+  def ids() = folder.list().filterNot(_.startsWith("."));
 
   def allProblems() = ids.map { read(_) }
 }
