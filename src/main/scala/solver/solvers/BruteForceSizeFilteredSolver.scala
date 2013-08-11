@@ -24,12 +24,12 @@ class BruteForceSizeFilteredSolver extends Solver {
     val filters = List(
       // STEP_OVER-Filter
       new SizeFilter, // OVER
+      new ShortcutShiftFilter, //OVER
       // both-STEP-Filter (at most one)
       // STEP_INTO-Filter
 
       new ValidFoldFilter, //both
       new ConstantFoldingFilter, //INTO
-      new ShortcutShiftFilter, //INTO
       new IdentityOpFilter, //INTO
       new TFoldConditionFilter, //both
       //new BinaryComparisonFilter, //INTO

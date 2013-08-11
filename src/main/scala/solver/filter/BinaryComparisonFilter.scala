@@ -11,10 +11,9 @@ class BinaryComparisonFilter extends Filter {
     e match {
       case b @ Box() => if (b.isEmpty) FilterV.OK else filter(b.e)
       case UApp(_, e) => filter(e)
-      case IfZero(cond, yes, no) => Math.max(filter(cond), Math.max(filter(yes), filter(no)))
-      case lang.Abstract.Fold(over, init, body) => Math.max(filter(over), Math.max(filter(init), filter(body)))
-      case BApp(_, e1, e2) => Math.max(Math.max(filter(e1), filter(e2)),
-                                 if (compare(e1, e2) < 0) FilterV.STEP_INTO else FilterV.OK)
+      case IfZero(cond, yes, no) => FilterV.or(FilterV.or(filter(cond), filter, yes), filter, no)
+      case lang.Abstract.Fold(over, init, body) => FilterV.or(FilterV.or(filter(over), filter, init), filter, body)
+      case BApp(_, e1, e2) => FilterV.or(FilterV.or(if (compare(e1, e2) < 0) FilterV.STEP_INTO else FilterV.OK, filter, e1), filter, e2)
       case _ => FilterV.OK
     }
   }
