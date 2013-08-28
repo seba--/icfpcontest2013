@@ -10,3 +10,6 @@ src_managed/
 project/boot/
 project/plugins/project/
 project/project/
+.idea
+.idea_modules
+icfpcontest2013.iml
