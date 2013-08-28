@@ -1,4 +1,4 @@
-== How to compile/develop/run ==
+﻿== How to compile/develop/run ==
 
 Prerequisite: Install SBT
 	http://www.scala-sbt.org/release/docs/Getting-Started/Setup.html#installing-sbt
@@ -13,11 +13,7 @@ Develop using Eclipse Scala IDE:
 	
 == Team and Signup information ==
 
-AUTH code: 0256cpBWw1iiQ9BmQnLRWzAEtN9fLxClBk9CYn3e  (don't forget "vpsH1H" at the end in requests)
-
 RULES: http://icfpc2013.cloudapp.net/
-
-PLAYGROUND: http://icfpc2013.cloudapp.net/play.html?auth=0256cpBWw1iiQ9BmQnLRWzAEtN9fLxClBk9CYn3evpsH1H
 
 TWITTER: https://twitter.com/ICFPContest2013
 
